@@ -5,7 +5,6 @@ import util.markdown_parser as markdown_parser
 import numpy as np
 import os
 import pandas as pd
-from prompts import *
 from config import DIRECTORY, query_context_window
 from pathlib import Path
 from sentence_transformers import SentenceTransformer

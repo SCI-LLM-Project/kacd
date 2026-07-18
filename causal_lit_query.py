@@ -10,7 +10,7 @@ import pandas as pd
 
 # %%
 # user defined imports
-from promptsd.causal_literature_prompts import *
+from query_prompts.causal_literature_prompts import *
 import util.helpers as helpers
 
 # %%
@@ -164,7 +164,7 @@ def llm_retriever(query, var1, var2, debug=False):
     return response.conclusion, helpers.reasoning_to_string_multiple_choice(response)
 
 # %%
-from promptsd.query_prompts import causal_lit_prompt
+from query_prompts.metric_prompts import causal_lit_prompt
 
 def query_local_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
@@ -201,7 +201,6 @@ tqdm.pandas()
 ## LLM
 
 # %%
-from prompts import *
 res = full.progress_apply(query_llm_causality, axis=1)
 
 # %%
@@ -217,7 +216,6 @@ llm_res
 # ## Local Search
 
 # %%
-from prompts import *
 res = full.progress_apply(query_local_causality, axis=1)
 
 # %%
@@ -237,15 +235,14 @@ with open("variable_definitions/default_definitions.json", "r") as file:
     def_map = json.load(file)
 
 # %%
-from promptsd.query_prompts import causal_lit_prompt
+from query_prompts.metric_prompts import causal_lit_prompt
 var1 = "Sex"
 var2 = "Anxiety"
 
 clquery = causal_lit_prompt(var1, var2)
 
 # %%
-from prompts import *
-from promptsd.causal_literature_prompts import reduce_causal_lit, predict_causal_lit, reduce_rag_causal_lit
+from query_prompts.causal_literature_prompts import reduce_causal_lit, predict_causal_lit, reduce_rag_causal_lit
 
 with open("raw_prompts/kg+rag_causal_literature_prompt.txt", "w") as f:
     print(reduce_causal_lit(clquery, var1, var2, "", def_map), file=f)

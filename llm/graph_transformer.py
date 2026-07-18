@@ -4,7 +4,6 @@ from langchain_core.documents import Document
 
 #from langchain_core.pydantic_v1 import BaseModel, Field, create_model
 from langchain_core.runnables import RunnableConfig
-from prompts import *
 from llm.factory import get_client
 
 def map_to_base_node(node: Any) -> Node:

@@ -3,7 +3,7 @@ import faiss, glob, os
 import numpy as np
 import pandas as pd
 import util.helpers as helpers
-from prompts import *
+from query_prompts.base_prompts import *
 import json
 
 
@@ -109,7 +109,7 @@ def local_retriever(query, var1, var2, summary, debug=False):
     
 
 # %%
-from promptsd.query_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
+from query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
 
 def query_local_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]

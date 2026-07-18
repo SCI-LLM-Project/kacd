@@ -1,5 +1,5 @@
 from models.ReportSchema import Report, Finding
-from prompts import summarize_community
+from construction_prompts.extraction_prompts import summarize_community
 from llm.factory import get_client
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD,NEO4J_DATABASE
 from langchain_community.graphs import Neo4jGraph

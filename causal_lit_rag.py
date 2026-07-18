@@ -4,7 +4,6 @@ import faiss, glob, os
 import numpy as np
 import pandas as pd
 import util.helpers as helpers
-from prompts import *
 import json
 
 # %% [markdown]
@@ -100,7 +99,7 @@ from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-from promptsd.causal_literature_prompts import reduce_rag_causal_lit
+from query_prompts.causal_literature_prompts import reduce_rag_causal_lit
 
 def local_retriever(query, var1, var2, summary, debug=False):
     if debug:
@@ -111,7 +110,7 @@ def local_retriever(query, var1, var2, summary, debug=False):
     
 
 # %%
-from promptsd.query_prompts import causal_lit_prompt
+from query_prompts.metric_prompts import causal_lit_prompt
 
 def query_local_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
