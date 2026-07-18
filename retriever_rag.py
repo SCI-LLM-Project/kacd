@@ -1,7 +1,7 @@
 import faiss
-import helpers
+import util.helpers as helpers
 import json
-import markdown_parser
+import util.markdown_parser as markdown_parser
 import numpy as np
 import os
 import pandas as pd

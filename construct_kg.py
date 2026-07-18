@@ -3,7 +3,7 @@
 
 # %%
 from llm.graph_transformer import LLMGraphTransformer
-import helpers
+import util.helpers as helpers
 import torch
 import os
 import pandas as pd
@@ -40,7 +40,7 @@ for idx in indexes:
 # ## Markdown parsing and chunking
 
 # %%
-import markdown_parser
+import util.markdown_parser as markdown_parser
 from pathlib import Path
 
 chunks = []
@@ -97,7 +97,7 @@ data
 # # Entity Resolution
 
 # %%
-import helpers
+import util.helpers as helpers
 from langchain_community.vectorstores import Neo4jVector
 from langchain_community.embeddings import OllamaEmbeddings, HuggingFaceEmbeddings
 from graphdatascience import GraphDataScience

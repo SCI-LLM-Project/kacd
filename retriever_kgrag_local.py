@@ -7,7 +7,7 @@ from neo4j import GraphDatabase, Result
 from typing import Dict, Any
 import torch
 import pandas as pd
-import helpers
+import util.helpers as helpers
 
 # KG-RAG setup
 

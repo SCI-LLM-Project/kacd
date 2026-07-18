@@ -10,7 +10,7 @@ import pandas as pd
 # %%
 # user defined imports
 from prompts import *
-import helpers
+import util.helpers as helpers
 
 # %%
 import warnings
@@ -123,7 +123,7 @@ lc_vector = Neo4jVector.from_existing_index(
 )
 
 # %%
-from helpers import *
+from util.helpers import *
 from build_context import stringify_report, format_triplet, construct_query_context
 from config import query_context_window
 

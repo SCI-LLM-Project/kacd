@@ -4,7 +4,7 @@ from llm.factory import get_client
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD,NEO4J_DATABASE
 from langchain_community.graphs import Neo4jGraph
 
-import helpers
+import util.helpers as helpers
 import heapq
 from tqdm import tqdm
 import random

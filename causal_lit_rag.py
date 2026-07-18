@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 import faiss, glob, os
 import numpy as np
 import pandas as pd
-import helpers
+import util.helpers as helpers
 from prompts import *
 import json
 
@@ -22,7 +22,7 @@ with open("variable_definitions/default_definitions.json", "r") as file:
 # # Markdown parsing and chunking
 
 # %%
-import markdown_parser
+import util.markdown_parser as markdown_parser
 from pathlib import Path
 from config import DIRECTORY
 
@@ -57,7 +57,7 @@ index.add(embs_normalized)
 # %%
 import numpy as np
 from config import query_context_window
-import helpers
+import util.helpers as helpers
 
 # we aren't actually using k here
 def get_k_docs(query: str, k: int = 100):
