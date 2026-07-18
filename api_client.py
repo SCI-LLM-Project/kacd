@@ -1,6 +1,6 @@
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional
 
+from tqdm.contrib.concurrent import thread_map
 from together import Together
 
 
@@ -17,12 +17,17 @@ class APIClient:
         api_key: Optional[str] = None,
         max_retries: int = 2,
         max_workers: int = 8,
+        max_tokens: int = 10000,
     ) -> None:
         self.schema = schema
         self.model = model
         # api_key=None falls back to the TOGETHER_API_KEY env var, same as the SDK's own default
         self.client = Together(api_key=api_key, max_retries=max_retries)
         self.max_workers = max_workers
+        # same default as VLLMClient's payload - an arbitrarily large cap, not a target.
+        # without this, a truncated response fails model_validate_json and burns a full
+        # retry round-trip for something that was never going to parse either time.
+        self.max_tokens = max_tokens
 
         # schema never changes for the life of this client - patch and build the
         # response_format once here instead of redoing it on every __call__
@@ -43,6 +48,7 @@ class APIClient:
             model=self.model,
             messages=messages,
             temperature=sampling_params.get("temperature", 0),
+            max_tokens=sampling_params.get("max_tokens", self.max_tokens),
         )
         if self._response_format:
             kwargs["response_format"] = self._response_format
@@ -58,19 +64,25 @@ class APIClient:
             return self.schema.model_validate_json(text) if self.schema else text
 
     def map(self, list_of_messages: List[List[Dict[str, str]]], sampling_params: Optional[Dict[str, Any]] = None):
-        """Run __call__ over many independent prompts concurrently, preserving order.
-        A single item's failure doesn't abort the batch - its slot in the returned
-        list is None (logged), same convention as VLLMClient's existing [] fallback."""
-        with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
-            futures = [pool.submit(self, messages, sampling_params=sampling_params) for messages in list_of_messages]
-            results = []
-            for i, f in enumerate(futures):
-                try:
-                    results.append(f.result())
-                except Exception as e:
-                    print(f"Error in APIClient.map() item {i}, skipping: {e}")
-                    results.append(None)
-            return results
+        """Run __call__ over many independent prompts concurrently, preserving order,
+        with a progress bar via tqdm's own ThreadPoolExecutor integration. thread_map
+        itself has no per-item exception isolation - a raised exception would blow
+        away every result, not just the failing one - so the try/except has to live
+        inside the function it calls, not around thread_map."""
+        def _safe_call(indexed_messages):
+            i, messages = indexed_messages
+            try:
+                return self(messages, sampling_params=sampling_params)
+            except Exception as e:
+                print(f"Error in APIClient.map() item {i}, skipping: {e}")
+                return None
+
+        return thread_map(
+            _safe_call,
+            list(enumerate(list_of_messages)),
+            max_workers=self.max_workers,
+            desc="APIClient.map",
+        )
 
 
 def _make_strict(schema: Dict[str, Any]) -> Dict[str, Any]:

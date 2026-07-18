@@ -1,5 +1,6 @@
 import requests
 from typing import Optional, Dict, Any, List
+from tqdm import tqdm
 from transformers import AutoTokenizer
 
 _tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.3")
@@ -89,7 +90,7 @@ class VLLMClient:
         error (server unreachable) raises before that - catch it here too so one
         bad item doesn't abort the rest of the batch, same convention as APIClient."""
         results = []
-        for i, messages in enumerate(list_of_messages):
+        for i, messages in enumerate(tqdm(list_of_messages, desc="VLLMClient.map")):
             try:
                 results.append(self(messages, sampling_params=sampling_params))
             except Exception as e:

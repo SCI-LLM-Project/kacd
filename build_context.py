@@ -57,12 +57,20 @@ def split_and_sort(community_info):
 
 # summarize all the leaf communities, storing information also in a dictionary for quick lookup
 def summarize_leaves(leaves, context_window_limit):
+    # build every leaf's context string first (cheap, no I/O) so all the LLM calls
+    # can be dispatched together afterward instead of one at a time
+    built = []
+    for leaf in tqdm(leaves, total=len(leaves), desc="Building Leaf Contexts"):
+        context, count = build_leaf_context(leaf, context_window_limit)
+        built.append((leaf, context, count))
+
+    summaries = summarize_context_windows_concurrent([context for _, context, _ in built])
+
     leaves_store = []
     leaves_map = {}
-
-    for leaf in tqdm(leaves, total=len(leaves), desc="Leaf Summarization Progress"):
-        summary, summary_token_count, community_token_count = leaf_context_builder(leaf, context_window_limit)
-        leaves_map[leaf["communityId"]] = (summary, summary_token_count, community_token_count)
+    for (leaf, context, count), summary in zip(built, summaries):
+        summary_token_count = helpers.token_count(stringify_summary(summary))
+        leaves_map[leaf["communityId"]] = (summary, summary_token_count, count)
         leaf["Report"] = summary
         leaves_store.append(leaf)
     return leaves_store, leaves_map
@@ -110,53 +118,63 @@ def normalize_nonleaves(nonleaves, leaves):
     print("Finished Normalizing Non Leaves")
     return nonleaves_new
 
-# for each nonleaf, if the triplet count exceeds context_window_limit, 
+# builds the context string for a nonleaf community, without calling the LLM.
+# small communities reuse the leaf context builder directly; large ones replace
+# child communities' triplets with their already-summarized reports first
+def build_nonleaf_context(community, context_window_limit):
+    # if the triplets fit under the context window limit, we are good
+    if community["community_token_count"] < context_window_limit:
+        context, count = build_leaf_context(community, context_window_limit)
+        return context
+
+    # replace triplets with community summaries in descending order by the total tokens within each community (essentially, not the summary itself)
+    context_window = ""
+    context_window_tokens = 0
+    children = community["children"]
+
+    # two escape options from the while loop: children list runs out, or context summaries don't fit anymore
+    while children:
+        raw_community_token_count, parent_id, summary_token_count, summary = heapq.heappop(children)
+
+        if summary_token_count + context_window_tokens > context_window_limit:
+            break
+
+        context_window += stringify_summary(summary)
+        context_window_tokens += summary_token_count # summary token count already accounts for the stringification
+        # delete all triplets from the list that are present in the summarized community
+        community["triplets"] = [
+            triplet for triplet in community["triplets"]
+            if triplet['parent_id'] != parent_id
+        ]
+
+    # now, if we have remaining context window space (context_window_tokens < context_window_limit), we add more triplets until the context runs out
+    if context_window_tokens < context_window_limit:
+        for triplet in community["triplets"]:
+            triplet_string = format_triplet(triplet)
+            triplet_string_count = helpers.token_count(triplet_string)
+            if triplet_string_count + context_window_tokens > context_window_limit:
+                break
+            context_window += triplet_string
+            context_window_tokens += triplet_string_count
+
+    return context_window
+
+# for each nonleaf, if the triplet count exceeds context_window_limit,
 # replace triplets with their associated community summary in which they belong to
 def summarize_nonleaves(nonleaves, context_window_limit):
-    community_summaries = []
+    print("Building Nonleaf Contexts")
+    contexts = [
+        build_nonleaf_context(community, context_window_limit)
+        for community in tqdm(nonleaves, total=len(nonleaves), desc="Nonleaf Context Building Progress")
+    ]
+
     print("Summarizing Nonleaves")
-    for community in tqdm(nonleaves, total=len(nonleaves), desc="Nonleaf Summarization Progress"):
-        context_window = ""
-        context_window_tokens = 0
+    summaries = summarize_context_windows_concurrent(contexts)
+    for community, summary in zip(nonleaves, summaries):
+        community["Report"] = summary
 
-        # if the triplets fit under the context window limit, we are good
-        if community["community_token_count"] < context_window_limit:
-            summary, summary_token_count, count = leaf_context_builder(community, context_window_limit)
-            community["Report"] = summary
-        else:
-            # replace triplets with community summaries in descending order by the total tokens within each community (essentially, not the summary itself)
-            children = community["children"]
-
-            # two escape options from the while loop: children list runs out, or context summaries don't fit anymore  
-            while children:
-                raw_community_token_count, parent_id, summary_token_count, summary = heapq.heappop(children)
-                
-                if summary_token_count + context_window_tokens > context_window_limit:
-                    break
-
-                context_window += stringify_summary(summary)
-                context_window_tokens += summary_token_count # summary token count already accounts for the stringification
-                # delete all triplets from the list that are present in the summarized community
-                community["triplets"] = [
-                    triplet for triplet in community["triplets"]
-                    if triplet['parent_id'] != parent_id
-                ]
-                
-            # now, if we have remaining context window space (context_window_tokens < context_window_limit), we add more triplets until the context runs out
-            if context_window_tokens < context_window_limit:
-                for triplet in community["triplets"]:
-                    triplet_string = format_triplet(triplet)
-                    triplet_string_count = helpers.token_count(triplet_string)
-                    if triplet_string_count + context_window_tokens > context_window_limit:
-                        break
-                    context_window += triplet_string
-                    context_window_tokens += triplet_string_count
-            summary = summarize_context_window(context_window)
-            community["Report"] = summary
-        
-        community_summaries.append(community)
     print("Finished Summarizing Non Leaves")
-    return community_summaries
+    return nonleaves
 
 # preprocesses the summarized community for entry into neo4j
 def normalize_summarized_community(community):
@@ -243,9 +261,17 @@ def construct_query_context(
     )
 
 # HELPERS below
-def summarize_context_window(context):
-    # returns report class
-    return generator(summarize_community(context), sampling_params={"n":1, "temperature":0, "top_k":1})
+
+# runs summarize_community over many context strings at once via the generator's
+# .map() if it supports one (APIClient/VLLMClient both do, with a progress bar and
+# per-item failure isolation built in) - falls back to a plain sequential loop for
+# the mock generator, which is just a function with no .map()
+def summarize_context_windows_concurrent(contexts):
+    messages_list = [summarize_community(context) for context in contexts]
+    sampling_params = {"n": 1, "temperature": 0, "top_k": 1}
+    if hasattr(generator, "map"):
+        return generator.map(messages_list, sampling_params=sampling_params)
+    return [generator(messages, sampling_params=sampling_params) for messages in messages_list]
 
 # include in prompt this triplet
 def format_triplet(t):
@@ -267,8 +293,9 @@ def get_parent_community(source_id):
         return None
     return result[0]["id"]
 
+# builds the context string for a leaf community, without calling the LLM.
 # assumes sorted triplets
-def leaf_context_builder(c, context_window_limit):
+def build_leaf_context(c, context_window_limit):
     count = 0
     context = ""
     for triplet in c["triplets"]:
@@ -278,10 +305,7 @@ def leaf_context_builder(c, context_window_limit):
             break
         count += triplet_count
         context += triplet_string
-    # generate summary here instead of returning context
-    summary = summarize_context_window(context)
-    summary_token_count = helpers.token_count(stringify_summary(summary))
-    return summary, summary_token_count, count
+    return context, count
 
 def stringify_report(report):
     string = ""

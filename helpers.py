@@ -3,11 +3,12 @@ import pandas as pd
 import numpy as np
 import json
 import re
-from concurrent.futures import ThreadPoolExecutor
+from tqdm.contrib.concurrent import thread_map
 from transformers import AutoTokenizer
 
-MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.3"
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+import config
+
+tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER_MODEL)
 
 def token_count(text):
     return len(tokenizer.encode(text))
@@ -45,15 +46,13 @@ def stringify_paths(paths):
     return prompt_str
 
 def parallel_apply(df, func, n_jobs=8):
-    # Split the dataframe into chunks
-    chunks = np.array_split(df, n_jobs)
-    
-    # Using ProcessPoolExecutor for CPU-bound tasks
-    with ThreadPoolExecutor(max_workers=n_jobs) as executor:
-        results = list(executor.map(lambda x: x.apply(func, axis=1), chunks))
-    
-    # Combine results
-    return pd.concat(results)
+    """Thread-based equivalent of df.apply(func, axis=1) - one call per row,
+    dispatched concurrently with a live progress bar and order preserved.
+    Good fit for I/O-bound row functions (LLM calls, Neo4j retrieval) - threads
+    release the GIL during I/O waits, so this doesn't help CPU-bound work."""
+    rows = [row for _, row in df.iterrows()]
+    results = thread_map(func, rows, max_workers=n_jobs, desc="parallel_apply")
+    return pd.Series(results, index=df.index)
 
 def clean_keyword_search( result ) -> str:
     res = ""

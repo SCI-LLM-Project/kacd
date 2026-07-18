@@ -3,10 +3,10 @@ version: '3.8'
 services:
   neo4j:
     image: neo4j:5.15.0
-    container_name: neo4j-kg
+    container_name: neo4j-kgv2
     ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
+      - "7475:7474"  # HTTP  (host 7475 -> Neo4j's real internal HTTP port 7474)
+      - "7688:7687"  # Bolt  (host 7688 -> Neo4j's real internal Bolt port 7687)
     environment:
       - NEO4J_AUTH=neo4j/password
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
@@ -17,7 +17,7 @@ services:
       - NEO4J_dbms_memory_heap_initial__size=512m
       - NEO4J_dbms_memory_heap_max__size=2G
     volumes:
-      - /mnt/danderson/neo4j/data:/data
+      - /mnt/danderson/neo4j/datav2:/data
       - /mnt/danderson/neo4j/logs:/logs
       - /mnt/danderson/neo4j/import:/var/lib/neo4j/import
       - /mnt/danderson/neo4j/plugins:/plugins
