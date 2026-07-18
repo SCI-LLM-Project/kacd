@@ -1,4 +1,3 @@
-import outlines
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, Union, cast, Callable
 from langchain_community.graphs.graph_document import GraphDocument, Node, Relationship
 from langchain_core.documents import Document
@@ -6,7 +5,7 @@ from langchain_core.documents import Document
 #from langchain_core.pydantic_v1 import BaseModel, Field, create_model
 from langchain_core.runnables import RunnableConfig
 from prompts import *
-from llm_client import get_client
+from llm.factory import get_client
 
 def map_to_base_node(node: Any) -> Node:
     """Map the SimpleNode to the base Node."""
@@ -95,7 +94,7 @@ class LLMGraphTransformer:
         prompt: Callable[[str, bool], str] = None,
         gleanings: int = 0
     ) -> None:
-        
+
         self.prompt = prompt
         self.schema = schema
         self.gleanings = gleanings
@@ -132,9 +131,7 @@ class LLMGraphTransformer:
         self, documents: Sequence[Document], config: Optional[RunnableConfig] = None
     ) -> List[GraphDocument]:
         """Same as convert_to_graph_documents, but dispatches every document's LLM
-        call concurrently via the backend's .map() instead of looping one at a time.
-        Worthwhile against a hosted API; a no-op-equivalent sequential fallback
-        against the local vLLM server (see VLLMClient.map)."""
+        call concurrently via the backend's .map() instead of looping one at a time."""
         all_messages = [self.prompt(document.page_content, debug=False) for document in documents]
         results = self.structured_llm.map(
             all_messages, sampling_params={"n": 1, "temperature": 0, "top_k": 1}
@@ -151,4 +148,3 @@ class LLMGraphTransformer:
                 GraphDocument(nodes=nodes, relationships=relationships, source=document)
             )
         return graph_documents
-

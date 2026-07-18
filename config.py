@@ -13,10 +13,9 @@ topRels = 50
 # expanding this to 20 so that we can fill out the context window.
 topEntities = 20
 
-# LLM backend selection: "vllm" (local outlines.serve.serve server, default), or
-# "together" (Together API, e.g. LLM_MODEL="meta-llama/Llama-3.3-70B-Instruct-Turbo"
-# or a fine-tuned model path like "your-org/your-model"). API keys are not stored
-# here - see .env / LLM_API_KEY (read as TOGETHER_API_KEY-equivalent for "together").
+# LLM backend selection - Together API (LLM_MODEL, e.g.
+# "meta-llama/Llama-3.3-70B-Instruct-Turbo", or a fine-tuned model's dedicated
+# endpoint name). API key is not stored here - see .env / LLM_API_KEY.
 LLM_BACKEND = "together"
 LLM_MODEL = "damonlin93410-8d4a/test"
 LLM_MAX_WORKERS = 32

@@ -2,13 +2,11 @@
 # # This notebook is meant for extracting Knowledge Graphs from MMD Files
 
 # %%
-import llm
+from llm.graph_transformer import LLMGraphTransformer
 import helpers
 import torch
-import outlines
 import os
 import pandas as pd
-from outlines import models
 from langchain_community.graphs import Neo4jGraph
 
 # %% [markdown]
@@ -70,7 +68,7 @@ from tqdm import tqdm
 from models.KnowledgeGraphSchema import KnowledgeGraph
 from prompts import graph_extraction_prompt
 
-llm_transformer = llm.LLMGraphTransformer(
+llm_transformer = LLMGraphTransformer(
     schema=KnowledgeGraph,
     prompt=graph_extraction_prompt
 )
@@ -104,8 +102,6 @@ from langchain_community.vectorstores import Neo4jVector
 from langchain_community.embeddings import OllamaEmbeddings, HuggingFaceEmbeddings
 from graphdatascience import GraphDataScience
 
-import outlines
-from vllm.sampling_params import SamplingParams
 from prompts import prompt_er
 from pydantic import BaseModel, create_model, Field
 from typing import List, Optional
@@ -193,7 +189,7 @@ potential_duplicate_candidates = graph.query(edit_distance_query, params={'dista
 
 # %%
 from prompts import prompt_er
-from llm_client import get_client
+from llm.factory import get_client
 
 class DuplicateEntities(BaseModel):
     entities: List[str] = Field(

@@ -6,8 +6,9 @@ from together import Together
 
 class APIClient:
     """
-    Drop-in replacement for VLLMClient backed by the Together API
-    (client.chat.completions.create, same response shape as openai-python).
+    LLM client backed by the Together API (client.chat.completions.create,
+    same response shape as openai-python), constrained to a Pydantic schema
+    via response_format.
     """
 
     def __init__(
@@ -24,9 +25,9 @@ class APIClient:
         # api_key=None falls back to the TOGETHER_API_KEY env var, same as the SDK's own default
         self.client = Together(api_key=api_key, max_retries=max_retries)
         self.max_workers = max_workers
-        # same default as VLLMClient's payload - an arbitrarily large cap, not a target.
-        # without this, a truncated response fails model_validate_json and burns a full
-        # retry round-trip for something that was never going to parse either time.
+        # an arbitrarily large cap, not a target. without this, a truncated response
+        # fails model_validate_json and burns a full retry round-trip for something
+        # that was never going to parse either time.
         self.max_tokens = max_tokens
 
         # schema never changes for the life of this client - patch and build the

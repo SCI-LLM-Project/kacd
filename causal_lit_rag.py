@@ -96,7 +96,7 @@ class Answer(BaseModel):
     conclusion: Literal['A', 'B', 'C']
 
 # %%
-from llm_client import get_client
+from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%

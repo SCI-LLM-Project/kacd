@@ -96,7 +96,7 @@ class Answer(BaseModel):
     conclusion: bool = Field(..., description="The culminating final conclusion or answer to the question")
 
 # %%
-from llm_client import get_client
+from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%

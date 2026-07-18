@@ -1,6 +1,6 @@
 # %%
 import pandas as pd
-from llm_client import get_client
+from llm.factory import get_client
 from prompts_directions import *
 from retriever_kgrag_local import retrieve_kgrag_context
 from retriever_rag import retrieve_rag_context
@@ -79,7 +79,7 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
         metric_reasoning_col: Name of the reasoning column (e.g., 'Plausibility Reasoning')
         metric_report_col: Name of the Report column
         report_type: whether to use RAG, KG-RAG, or LLM (no report)
-        generator: LLM client (from llm_client.get_client) for LLM queries
+        generator: LLM client (from llm.factory.get_client) for LLM queries
         prompt_type: Type of prompt to use ('Plausibility', 'Association', 'Temporality', 'Causal')
     
     Returns:

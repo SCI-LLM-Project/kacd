@@ -62,9 +62,7 @@ class Answer(BaseModel):
     conclusion: bool = Field(..., description="The culminating final conclusion or answer to the question")
 
 # %%
-from vllm.sampling_params import SamplingParams
-from outlines import generate, samplers
-from llm_client import get_client
+from llm.factory import get_client
 
 generator = get_client(schema=Answer)
 summarizer = get_client()
