@@ -1,7 +1,7 @@
 # %%
 import pandas as pd
 from llm.factory import get_client
-from query_prompts.prompts_directions import *
+from prompts.query_prompts.prompts_directions import *
 from retriever_kgrag_local import retrieve_kgrag_context
 from retriever_rag import retrieve_rag_context
 

@@ -66,7 +66,7 @@ from langchain_core.documents import Document
 from retry import retry
 from tqdm import tqdm
 from models.KnowledgeGraphSchema import KnowledgeGraph
-from construction_prompts.extraction_prompts import graph_extraction_prompt
+from prompts.construction_prompts.extraction_prompts import graph_extraction_prompt
 
 llm_transformer = LLMGraphTransformer(
     schema=KnowledgeGraph,
@@ -102,7 +102,7 @@ from langchain_community.vectorstores import Neo4jVector
 from langchain_community.embeddings import OllamaEmbeddings, HuggingFaceEmbeddings
 from graphdatascience import GraphDataScience
 
-from construction_prompts.extraction_prompts import entity_resolution_prompt
+from prompts.construction_prompts.extraction_prompts import entity_resolution_prompt
 from pydantic import BaseModel, create_model, Field
 from typing import List, Optional
 from retry import retry
@@ -188,7 +188,7 @@ word_edit_distance = 2
 potential_duplicate_candidates = graph.query(edit_distance_query, params={'distance': word_edit_distance, 'min_length': 5})
 
 # %%
-from construction_prompts.extraction_prompts import entity_resolution_prompt
+from prompts.construction_prompts.extraction_prompts import entity_resolution_prompt
 from llm.factory import get_client
 
 class DuplicateEntities(BaseModel):

@@ -99,7 +99,7 @@ from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-from query_prompts.causal_literature_prompts import query_rag_causal_lit_prompt
+from prompts.query_prompts.causal_literature_prompts import query_rag_causal_lit_prompt
 
 def local_retriever(query, var1, var2, summary, debug=False):
     if debug:
@@ -110,7 +110,7 @@ def local_retriever(query, var1, var2, summary, debug=False):
     
 
 # %%
-from query_prompts.metric_prompts import causal_lit_prompt
+from prompts.query_prompts.metric_prompts import causal_lit_prompt
 
 def query_local_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]

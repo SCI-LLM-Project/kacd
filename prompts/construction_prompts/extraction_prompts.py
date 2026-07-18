@@ -1,4 +1,4 @@
-from construction_prompts.prompts_graphrag import graphrag_extraction_prompt, graphrag_community_prompt
+from prompts.construction_prompts.prompts_graphrag import graphrag_extraction_prompt, graphrag_community_prompt
 
 
 def entity_resolution_prompt(entities, debug=False):

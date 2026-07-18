@@ -10,7 +10,7 @@ import pandas as pd
 
 # %%
 # user defined imports
-from query_prompts.causal_literature_prompts import *
+from prompts.query_prompts.causal_literature_prompts import *
 import util.helpers as helpers
 
 # %%
@@ -164,7 +164,7 @@ def llm_retriever(query, var1, var2, debug=False):
     return response.conclusion, helpers.reasoning_to_string_multiple_choice(response)
 
 # %%
-from query_prompts.metric_prompts import causal_lit_prompt
+from prompts.query_prompts.metric_prompts import causal_lit_prompt
 
 def query_local_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
@@ -235,14 +235,14 @@ with open("variable_definitions/default_definitions.json", "r") as file:
     def_map = json.load(file)
 
 # %%
-from query_prompts.metric_prompts import causal_lit_prompt
+from prompts.query_prompts.metric_prompts import causal_lit_prompt
 var1 = "Sex"
 var2 = "Anxiety"
 
 clquery = causal_lit_prompt(var1, var2)
 
 # %%
-from query_prompts.causal_literature_prompts import query_kg_causal_lit_prompt, query_llm_causal_lit_prompt, query_rag_causal_lit_prompt
+from prompts.query_prompts.causal_literature_prompts import query_kg_causal_lit_prompt, query_llm_causal_lit_prompt, query_rag_causal_lit_prompt
 
 with open("raw_prompts/kg+rag_causal_literature_prompt.txt", "w") as f:
     print(query_kg_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)

@@ -9,7 +9,7 @@ import pandas as pd
 
 # %%
 # user defined imports
-from query_prompts.base_prompts import *
+from prompts.query_prompts.base_prompts import *
 import util.helpers as helpers
 
 # %%
@@ -164,7 +164,7 @@ def llm_retriever(query, var1, var2, debug=False):
 
 
 # %%
-from query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
+from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
 
 def query_local_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
@@ -212,7 +212,7 @@ full = pd.read_csv(f"{path}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
 # %%
 tqdm.pandas(desc="Querying LLM")
-from query_prompts.base_prompts import *
+from prompts.query_prompts.base_prompts import *
 res = full.progress_apply(query_llm_causality, axis=1)
 
 # %%
@@ -234,7 +234,7 @@ print(f1_score(llm_res["Label"], llm_res["Plausibility"]))
 
 # %%
 tqdm.pandas(desc="Querying Local Search")
-from query_prompts.base_prompts import *
+from prompts.query_prompts.base_prompts import *
 res = full.progress_apply(query_local_causality, axis=1)
 
 # %%
@@ -259,7 +259,7 @@ with open("variable_definitions/default_definitions.json", "r") as file:
     def_map = json.load(file)
 
 # %%
-from query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
+from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
 
 var1 = "Sex"
 var2 = "Anxiety"
@@ -282,7 +282,7 @@ aquery = association_prompt(var1, var2)
 tquery = temporality_prompt(var1, var2)
 
 # %%
-from query_prompts.base_prompts import *
+from prompts.query_prompts.base_prompts import *
 with open("raw_prompts/kg+llm_prompt_plausibility.txt", "w") as f:
     print(query_kg_prompt(pquery, var1, var2, "", def_map), file=f)
 
