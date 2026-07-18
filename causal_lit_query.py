@@ -150,17 +150,17 @@ def retrieve_context_query(query) -> str:
 # %%
 def local_retriever(query, var1, var2, summary, debug=False):
     if debug:
-        print(reduce_causal_lit(query, var1, var2, summary, def_map))
-        print(helpers.token_count(reduce_causal_lit(query, var1, var2, summary, def_map)))
-    response = generator(reduce_causal_lit(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+        print(query_kg_causal_lit_prompt(query, var1, var2, summary, def_map))
+        print(helpers.token_count(query_kg_causal_lit_prompt(query, var1, var2, summary, def_map)))
+    response = generator(query_kg_causal_lit_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
 
     return response.conclusion, helpers.reasoning_to_string_multiple_choice(response)
 
 # %%
 def llm_retriever(query, var1, var2, debug=False):
     if debug:
-        print(predict_causal_lit(query, var1, var2, def_map))
-    response = generator(predict_causal_lit(query, var1, var2, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+        print(query_llm_causal_lit_prompt(query, var1, var2, def_map))
+    response = generator(query_llm_causal_lit_prompt(query, var1, var2, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
     return response.conclusion, helpers.reasoning_to_string_multiple_choice(response)
 
 # %%
@@ -242,15 +242,15 @@ var2 = "Anxiety"
 clquery = causal_lit_prompt(var1, var2)
 
 # %%
-from query_prompts.causal_literature_prompts import reduce_causal_lit, predict_causal_lit, reduce_rag_causal_lit
+from query_prompts.causal_literature_prompts import query_kg_causal_lit_prompt, query_llm_causal_lit_prompt, query_rag_causal_lit_prompt
 
 with open("raw_prompts/kg+rag_causal_literature_prompt.txt", "w") as f:
-    print(reduce_causal_lit(clquery, var1, var2, "", def_map), file=f)
+    print(query_kg_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
 
 with open("raw_prompts/llm+rag_causal_literature_prompt.txt", "w") as f:
-    print(reduce_rag_causal_lit(clquery, var1, var2, "", def_map), file=f)
+    print(query_rag_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
 
 with open("raw_prompts/llm_prompt_causal_literature.txt", "w") as f:
-    print(predict_causal_lit(clquery, var1, var2, def_map), file=f)
+    print(query_llm_causal_lit_prompt(clquery, var1, var2, def_map), file=f)
 
 

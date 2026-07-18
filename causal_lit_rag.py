@@ -99,12 +99,12 @@ from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-from query_prompts.causal_literature_prompts import reduce_rag_causal_lit
+from query_prompts.causal_literature_prompts import query_rag_causal_lit_prompt
 
 def local_retriever(query, var1, var2, summary, debug=False):
     if debug:
-        print(reduce_rag_causal_lit(query, var1, var2, summary, def_map))
-    response = generator(reduce_rag_causal_lit(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+        print(query_rag_causal_lit_prompt(query, var1, var2, summary, def_map))
+    response = generator(query_rag_causal_lit_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
 
     return response.conclusion, helpers.reasoning_to_string_multiple_choice(response)
     

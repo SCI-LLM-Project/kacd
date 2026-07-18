@@ -1,7 +1,7 @@
 from construction_prompts.prompts_graphrag import graphrag_extraction_prompt, graphrag_community_prompt
 
 
-def prompt_er(entities, debug=False):
+def entity_resolution_prompt(entities, debug=False):
     system = (
         "\n--- ROLE ---\n"
         "You are a data processing assistant. Your task is to identify duplicate entities in a list and decide which of them should be merged. "

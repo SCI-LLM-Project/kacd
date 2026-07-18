@@ -1,4 +1,4 @@
-def reduce(question, var1, var2, report, definitions, debug=False):
+def query_kg_prompt(question, var1, var2, report, definitions, debug=False):
     system = (
         "\n--- ROLE ---\n"
         "You are an expert in the field of chronic pain, health care, and medicine. Given the question, output True or False. You will be reading two reports from the leading experts of chronic lower back pain to help answer the given question.\n"
@@ -58,7 +58,7 @@ class Answer(BaseModel):
     return messages
 
 
-def predict(question, var1, var2, definitions, debug=False):
+def query_llm_prompt(question, var1, var2, definitions, debug=False):
 
     system = (
         "\n--- ROLE ---\n"
@@ -104,7 +104,7 @@ class Answer(BaseModel):
         print(messages)
     return messages
 
-def reduce_rag(question, var1, var2, report, definitions, debug=False):
+def query_rag_prompt(question, var1, var2, report, definitions, debug=False):
     system = (
         "\n--- ROLE ---\n"
         "You are an expert in the field of chronic pain, health care, and medicine. Given the question, output True or False. You will be reading two reports from the leading experts of chronic lower back pain to help answer the given question.\n"

@@ -102,7 +102,7 @@ from langchain_community.vectorstores import Neo4jVector
 from langchain_community.embeddings import OllamaEmbeddings, HuggingFaceEmbeddings
 from graphdatascience import GraphDataScience
 
-from construction_prompts.extraction_prompts import prompt_er
+from construction_prompts.extraction_prompts import entity_resolution_prompt
 from pydantic import BaseModel, create_model, Field
 from typing import List, Optional
 from retry import retry
@@ -188,7 +188,7 @@ word_edit_distance = 2
 potential_duplicate_candidates = graph.query(edit_distance_query, params={'distance': word_edit_distance, 'min_length': 5})
 
 # %%
-from construction_prompts.extraction_prompts import prompt_er
+from construction_prompts.extraction_prompts import entity_resolution_prompt
 from llm.factory import get_client
 
 class DuplicateEntities(BaseModel):
@@ -206,7 +206,7 @@ extraction_llm = get_client(schema=Disambiguate)
 
 @retry(tries=1, delay=2)
 def entity_resolution(entities: List[str]) -> Optional[List[str]]:
-    res = extraction_llm(prompt_er(sorted(entities)), sampling_params={"n":1, "temperature":0, "top_k":1})
+    res = extraction_llm(entity_resolution_prompt(sorted(entities)), sampling_params={"n":1, "temperature":0, "top_k":1})
     return [
         el.entities
         for el in res.merge_entities

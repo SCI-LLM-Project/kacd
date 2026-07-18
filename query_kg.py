@@ -149,8 +149,8 @@ def retrieve_context_query(query) -> str:
 # %%
 def local_retriever(query, var1, var2, summary, debug=False):
     if debug:
-        print(reduce(query, var1, var2, summary, def_map))
-    response = generator(reduce(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+        print(query_kg_prompt(query, var1, var2, summary, def_map))
+    response = generator(query_kg_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
 
     return response.conclusion, helpers.reasoning_to_string(response)
     
@@ -158,8 +158,8 @@ def local_retriever(query, var1, var2, summary, debug=False):
 # %%
 def llm_retriever(query, var1, var2, debug=False):
     if debug:
-        print(predict(query, var1, var2, def_map))
-    response = generator(predict(query, var1, var2, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+        print(query_llm_prompt(query, var1, var2, def_map))
+    response = generator(query_llm_prompt(query, var1, var2, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
     return response.conclusion, helpers.reasoning_to_string(response)
 
 
@@ -284,32 +284,32 @@ tquery = temporality_prompt(var1, var2)
 # %%
 from query_prompts.base_prompts import *
 with open("raw_prompts/kg+llm_prompt_plausibility.txt", "w") as f:
-    print(reduce(pquery, var1, var2, "", def_map), file=f)
+    print(query_kg_prompt(pquery, var1, var2, "", def_map), file=f)
 
 with open("raw_prompts/kg+llm_prompt_association.txt", "w") as f:
-    print(reduce(aquery, var1, var2, "", def_map), file=f)
+    print(query_kg_prompt(aquery, var1, var2, "", def_map), file=f)
 
 with open("raw_prompts/kg+llm_prompt_temporality.txt", "w") as f:
-    print(reduce(tquery, var1, var2, "", def_map), file=f)
+    print(query_kg_prompt(tquery, var1, var2, "", def_map), file=f)
 
 # %%
 with open("raw_prompts/llm+rag_prompt_plausibility.txt", "w") as f:
-    print(reduce_rag(pquery, var1, var2, "", def_map), file=f)
+    print(query_rag_prompt(pquery, var1, var2, "", def_map), file=f)
 
 with open("raw_prompts/llm+rag_prompt_association.txt", "w") as f:
-    print(reduce_rag(aquery, var1, var2, "", def_map), file=f)
+    print(query_rag_prompt(aquery, var1, var2, "", def_map), file=f)
 
 with open("raw_prompts/llm+rag_prompt_temporality.txt", "w") as f:
-    print(reduce_rag(tquery, var1, var2, "", def_map), file=f)
+    print(query_rag_prompt(tquery, var1, var2, "", def_map), file=f)
 
 # %%
 with open("raw_prompts/llm_prompt_plausibility.txt", "w") as f:
-    print(predict(pquery, var1, var2,  def_map), file=f)
+    print(query_llm_prompt(pquery, var1, var2,  def_map), file=f)
 
 with open("raw_prompts/llm_prompt_association.txt", "w") as f:
-    print(predict(aquery, var1, var2,  def_map), file=f)
+    print(query_llm_prompt(aquery, var1, var2,  def_map), file=f)
 
 with open("raw_prompts/llm_prompt_temporality.txt", "w") as f:
-    print(predict(tquery, var1, var2,  def_map), file=f)
+    print(query_llm_prompt(tquery, var1, var2,  def_map), file=f)
 
 

@@ -102,8 +102,8 @@ generator = get_client(schema=Answer)
 # %%
 def local_retriever(query, var1, var2, summary, debug=False):
     if debug:
-        print(reduce_rag(query, var1, var2, summary, def_map))
-    response = generator(reduce_rag(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+        print(query_rag_prompt(query, var1, var2, summary, def_map))
+    response = generator(query_rag_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
 
     return response.conclusion, helpers.reasoning_to_string(response)
     

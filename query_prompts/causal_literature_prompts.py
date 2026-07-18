@@ -10,7 +10,7 @@ with open("variable_definitions/ontological_definitions.json", "r") as file:
 
 OUTPUT_FORMAT = "A, B, or C"
 
-def reduce_causal_lit(question, var1, var2, report, definitions, debug=False):
+def query_kg_causal_lit_prompt(question, var1, var2, report, definitions, debug=False):
     system = (
         "\n--- ROLE ---\n"
         f"You are an expert in the field of chronic pain, health care, and medicine. Given the multiple choice question, output {OUTPUT_FORMAT}. You will be reading two reports from the leading experts of chronic lower back pain to help answer the given question.\n"
@@ -70,7 +70,7 @@ class Answer(BaseModel):
     return messages
 
 
-def predict_causal_lit(question, var1, var2, definitions, debug=False):
+def query_llm_causal_lit_prompt(question, var1, var2, definitions, debug=False):
 
     system = (
         "\n--- ROLE ---\n"
@@ -116,7 +116,7 @@ class Answer(BaseModel):
         print(messages)
     return messages
 
-def reduce_rag_causal_lit(question, var1, var2, report, definitions, debug=False):
+def query_rag_causal_lit_prompt(question, var1, var2, report, definitions, debug=False):
     system = (
         "\n--- ROLE ---\n"
         f"You are an expert in the field of chronic pain, health care, and medicine. Given the multiple choice question, output {OUTPUT_FORMAT}. You will be reading two reports from the leading experts of chronic lower back pain to help answer the given question.\n"
