@@ -6,7 +6,7 @@ from langchain_core.documents import Document
 #from langchain_core.pydantic_v1 import BaseModel, Field, create_model
 from langchain_core.runnables import RunnableConfig
 from prompts import *
-from vllm_client import VLLMClient
+from llm_client import get_client
 
 def map_to_base_node(node: Any) -> Node:
     """Map the SimpleNode to the base Node."""
@@ -99,7 +99,7 @@ class LLMGraphTransformer:
         self.prompt = prompt
         self.schema = schema
         self.gleanings = gleanings
-        self.structured_llm = VLLMClient(schema=self.schema)
+        self.structured_llm = get_client(schema=self.schema)
 
     def process_response(
         self, document: Document, config: Optional[RunnableConfig] = None
@@ -113,7 +113,7 @@ class LLMGraphTransformer:
         # langchain backlips to convert the graph into langchain graph documents
         nodes, relationships = _convert_to_graph_document(res)
         return GraphDocument(nodes=nodes, relationships=relationships, source=document)
-        
+
     def convert_to_graph_documents(
         self, documents: Sequence[Document], config: Optional[RunnableConfig] = None
     ) -> List[GraphDocument]:
@@ -127,4 +127,23 @@ class LLMGraphTransformer:
             Sequence[GraphDocument]: The transformed documents as graphs.
         """
         return [self.process_response(document, config) for document in documents]
+
+    def convert_to_graph_documents_concurrent(
+        self, documents: Sequence[Document], config: Optional[RunnableConfig] = None
+    ) -> List[GraphDocument]:
+        """Same as convert_to_graph_documents, but dispatches every document's LLM
+        call concurrently via the backend's .map() instead of looping one at a time.
+        Worthwhile against a hosted API; a no-op-equivalent sequential fallback
+        against the local vLLM server (see VLLMClient.map)."""
+        all_messages = [self.prompt(document.page_content, debug=False) for document in documents]
+        results = self.structured_llm.map(
+            all_messages, sampling_params={"n": 1, "temperature": 0, "top_k": 1}
+        )
+        graph_documents = []
+        for res, document in zip(results, documents):
+            nodes, relationships = _convert_to_graph_document(res)
+            graph_documents.append(
+                GraphDocument(nodes=nodes, relationships=relationships, source=document)
+            )
+        return graph_documents
 

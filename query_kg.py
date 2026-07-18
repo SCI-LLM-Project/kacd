@@ -64,10 +64,10 @@ class Answer(BaseModel):
 # %%
 from vllm.sampling_params import SamplingParams
 from outlines import generate, samplers
-from vllm_client import VLLMClient
+from llm_client import get_client
 
-generator = VLLMClient(schema=Answer)
-summarizer = VLLMClient()
+generator = get_client(schema=Answer)
+summarizer = get_client()
 
 # %% [markdown]
 # # Local Retriever

@@ -40,9 +40,6 @@ for file in files:
 # # Creating the Retriever
 
 # %%
-from vllm_client import VLLMClient
-
-# %%
 model = SentenceTransformer('pritamdeka/S-PubMedBert-MS-MARCO')
 
 # %%
@@ -99,8 +96,8 @@ class Answer(BaseModel):
     conclusion: Literal['A', 'B', 'C']
 
 # %%
-from vllm_client import VLLMClient
-generator = VLLMClient(schema=Answer)
+from llm_client import get_client
+generator = get_client(schema=Answer)
 
 # %%
 from promptsd.causal_literature_prompts import reduce_rag_causal_lit

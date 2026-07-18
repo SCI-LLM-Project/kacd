@@ -76,31 +76,19 @@ llm_transformer = llm.LLMGraphTransformer(
 )
 
 # %%
-@retry(tries=2, delay=2)
-def process_text(text: str) -> List[GraphDocument]:
-    doc = Document(page_content=text)
-    try:
-        return llm_transformer.convert_to_graph_documents([doc])
-    except Exception as e:
-        print(e)
-        return []
+# dispatches every chunk's extraction call concurrently via the backend's .map()
+# instead of looping one chunk at a time - a big win against a hosted API, a no-op
+# against the local vLLM server (see VLLMClient.map)
+docs = [Document(page_content=chunk) for chunk in chunks]
+graph_documents = llm_transformer.convert_to_graph_documents_concurrent(docs)
 
 # %%
-from tqdm import tqdm
-
-graph_documents = list(tqdm(
-    map(process_text, chunks),
-    total=len(chunks)
-))
-
-# %%
-for doc in graph_documents:
-    # this automatically combines nodes / relationships that have the same id
-    graph.add_graph_documents(
-        doc,
-        baseEntityLabel=True,
-        include_source=True
-    )
+# this automatically combines nodes / relationships that have the same id
+graph.add_graph_documents(
+    graph_documents,
+    baseEntityLabel=True,
+    include_source=True
+)
 
 # %%
 data = pd.DataFrame(graph.query("match (n:__Entity__)-[r]->(m:__Entity__) return n.id, n.description, r.strength, type(r), r.description, m.id, m.description order by type(r), n.id asc"))
@@ -117,7 +105,6 @@ from langchain_community.embeddings import OllamaEmbeddings, HuggingFaceEmbeddin
 from graphdatascience import GraphDataScience
 
 import outlines
-from vllm_client import VLLMClient
 from vllm.sampling_params import SamplingParams
 from prompts import prompt_er
 from pydantic import BaseModel, create_model, Field
@@ -206,7 +193,7 @@ potential_duplicate_candidates = graph.query(edit_distance_query, params={'dista
 
 # %%
 from prompts import prompt_er
-from vllm_client import VLLMClient
+from llm_client import get_client
 
 class DuplicateEntities(BaseModel):
     entities: List[str] = Field(
@@ -219,7 +206,7 @@ class Disambiguate(BaseModel):
         description="Lists of entities that represent the same object or real-world entity and should be merged"
     )
 
-extraction_llm = VLLMClient(schema=Disambiguate)
+extraction_llm = get_client(schema=Disambiguate)
 
 @retry(tries=1, delay=2)
 def entity_resolution(entities: List[str]) -> Optional[List[str]]:

@@ -1,9 +1,6 @@
-from transformers import AutoTokenizer
 from pathlib import Path
 
 import json
-
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.3")
 
 with open("variable_definitions/default_definitions.json", "r") as file:
     default = json.load(file)
@@ -39,7 +36,7 @@ class Answer(BaseModel):
 """
         "Specifically, each reasoning step must contain your intermediate thought process, and your final answer to the question must be in the conclusion field. "
         "Your final conclusion MUST be consistent with your reasoning.\n"
-        
+
         "\n --- REPORT STRUCTURE ---\n"
         "You will be given two separate reports from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:\n"
         "Knowledge Graph Communities: Each community will consist of a title, a summary, and a list of key findings.\n"
@@ -64,18 +61,13 @@ class Answer(BaseModel):
         "\n--- QUESTION ---\n"
         f"{ question }\n"
     )
-    prompt = tokenizer.apply_chat_template(
-        [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
     if debug:
-        print(prompt)
-    return prompt
+        print(messages)
+    return messages
 
 
 def predict_causal_lit(question, var1, var2, definitions, debug=False):
@@ -99,7 +91,7 @@ class Answer(BaseModel):
 """
         "Specifically, each reasoning step must contain your intermediate thought process, and your final answer to the question must be in the conclusion field. "
         "Your final conclusion MUST be consistent with your reasoning. "
-        
+
     )
 
     user = (
@@ -116,18 +108,13 @@ class Answer(BaseModel):
         f"{ question }\n"
     )
 
-    prompt = tokenizer.apply_chat_template(
-        [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
     if debug:
-        print(prompt)
-    return prompt
+        print(messages)
+    return messages
 
 def reduce_rag_causal_lit(question, var1, var2, report, definitions, debug=False):
     system = (
@@ -155,7 +142,7 @@ class Answer(BaseModel):
 """
         "Specifically, each reasoning step must contain your intermediate thought process, and your final answer to the question must be in the conclusion field. "
         "Your final conclusion MUST be consistent with your reasoning.\n"
-        
+
         "\n --- REPORT STRUCTURE ---\n"
         "You will be given two separate reports from experts of chronic lower back pain to help answer the given question. A report will consist of a collection of text segments relevant to the question given.\n"
         "Note that the reports will be given in markdown format."
@@ -175,15 +162,10 @@ class Answer(BaseModel):
         "\n--- QUESTION ---\n"
         f"{ question }\n"
     )
-    prompt = tokenizer.apply_chat_template(
-        [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
     if debug:
-        print(prompt)
-    return prompt
+        print(messages)
+    return messages

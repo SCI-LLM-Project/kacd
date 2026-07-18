@@ -1,6 +1,6 @@
 from models.ReportSchema import Report, Finding
 from prompts import summarize_community
-from vllm_client import VLLMClient
+from llm_client import get_client
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD,NEO4J_DATABASE
 from langchain_community.graphs import Neo4jGraph
 
@@ -39,7 +39,7 @@ if USE_MOCK_GENERATOR:
     generator = mock_generator
     print("WARNING: Using MOCK generator - no actual LLM calls will be made!")
 else:
-    generator = VLLMClient(schema=Report)
+    generator = get_client(schema=Report)
 
 # splits the community info into leaf communitites and nonleaf communities
 def split_and_sort(community_info):

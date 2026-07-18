@@ -1,6 +1,6 @@
 # %%
 import pandas as pd
-from vllm_client import VLLMClient
+from llm_client import get_client
 from prompts_directions import *
 from retriever_kgrag_local import retrieve_kgrag_context
 from retriever_rag import retrieve_rag_context
@@ -48,7 +48,7 @@ class Answer(BaseModel):
     reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
     conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
 
-generator = VLLMClient(Answer)
+generator = get_client(schema=Answer)
 
 # %%
 def answer_to_string(reasoning_steps, conclusion=None):
@@ -79,7 +79,7 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
         metric_reasoning_col: Name of the reasoning column (e.g., 'Plausibility Reasoning')
         metric_report_col: Name of the Report column
         report_type: whether to use RAG, KG-RAG, or LLM (no report)
-        generator: VLLMClient generator for LLM queries
+        generator: LLM client (from llm_client.get_client) for LLM queries
         prompt_type: Type of prompt to use ('Plausibility', 'Association', 'Temporality', 'Causal')
     
     Returns:

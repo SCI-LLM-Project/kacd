@@ -1,7 +1,4 @@
 import json
-from transformers import AutoTokenizer
-
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.3")
 
 with open("variable_definitions/default_definitions.json", "r") as file:
     def_map = json.load(file)
@@ -42,12 +39,7 @@ You will be given a report from experts of chronic lower back pain to help answe
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_association_prompt_rag(var1, var2, report):
@@ -80,12 +72,7 @@ You will be given a report from experts of chronic lower back pain to help answe
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_temporality_prompt_rag(var1, var2, report):
@@ -118,12 +105,7 @@ You will be given a report from experts of chronic lower back pain to help answe
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_causal_prompt_rag(var1, var2, report):
@@ -154,12 +136,7 @@ You will be given a report from experts of chronic lower back pain to help answe
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 def create_plausibility_prompt_kg(var1, var2, report):
     """Create prompt for determining plausible causal direction."""
@@ -196,12 +173,7 @@ Each Relationship included will follow a knowledge graph triplet structure:
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_association_prompt_kg(var1, var2, report):
@@ -239,12 +211,7 @@ Each Relationship included will follow a knowledge graph triplet structure:
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_temporality_prompt_kg(var1, var2, report):
@@ -282,12 +249,7 @@ Each Relationship included will follow a knowledge graph triplet structure:
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_causal_prompt_kg(var1, var2, report):
@@ -323,12 +285,7 @@ Each Relationship included will follow a knowledge graph triplet structure:
 Note that the reports will be given in markdown format.
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 # The LLM doesn't have a report, but I am including the report here so that I don't have to complicate the logic downstream
 def create_plausibility_prompt_llm(var1, var2, report):
@@ -354,12 +311,7 @@ class Answer(BaseModel):
     conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_association_prompt_llm(var1, var2, report):
@@ -385,12 +337,7 @@ class Answer(BaseModel):
     conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_temporality_prompt_llm(var1, var2, report):
@@ -416,12 +363,7 @@ class Answer(BaseModel):
     conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
 
 
 def create_causal_prompt_llm(var1, var2, report):
@@ -445,9 +387,4 @@ class Answer(BaseModel):
     conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
     """
 
-    return tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=False,
-        add_bos=True,
-        add_generation_prompt=True,
-    )
+    return [{"role": "user", "content": content}]
