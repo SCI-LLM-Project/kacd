@@ -1,4 +1,4 @@
-NEO4J_URI = "bolt://localhost:7687"
+NEO4J_URI = "bolt://localhost:7688"
 NEO4J_USERNAME = "neo4j"
 NEO4J_PASSWORD = "password"
 NEO4J_DATABASE = "neo4j"
@@ -14,10 +14,9 @@ topRels = 50
 topEntities = 20
 
 # LLM backend selection: "vllm" (local outlines.serve.serve server, default), or
-# "openai_compatible" (any host speaking the OpenAI chat API - OpenAI, Azure OpenAI,
-# Together, Fireworks, DeepInfra, Groq, or your own vLLM OpenAI-server, via LLM_BASE_URL).
-# API keys are not stored here - see .env / LLM_API_KEY.
-LLM_BACKEND = "vllm"
-LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
-LLM_BASE_URL = None
+# "together" (Together API, e.g. LLM_MODEL="meta-llama/Llama-3.3-70B-Instruct-Turbo"
+# or a fine-tuned model path like "your-org/your-model"). API keys are not stored
+# here - see .env / LLM_API_KEY (read as TOGETHER_API_KEY-equivalent for "together").
+LLM_BACKEND = "together"
+LLM_MODEL = "damonlin93410-8d4a/test"
 LLM_MAX_WORKERS = 8

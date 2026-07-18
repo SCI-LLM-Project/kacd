@@ -141,7 +141,12 @@ class LLMGraphTransformer:
         )
         graph_documents = []
         for res, document in zip(results, documents):
-            nodes, relationships = _convert_to_graph_document(res)
+            if not res:
+                # this document's extraction call failed (see structured_llm.map's
+                # per-item error handling) - contributes nothing, doesn't affect the rest
+                nodes, relationships = [], []
+            else:
+                nodes, relationships = _convert_to_graph_document(res)
             graph_documents.append(
                 GraphDocument(nodes=nodes, relationships=relationships, source=document)
             )

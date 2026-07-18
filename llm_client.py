@@ -14,12 +14,11 @@ def get_client(schema=None):
     if config.LLM_BACKEND == "vllm":
         return VLLMClient(schema=schema)
 
-    if config.LLM_BACKEND == "openai_compatible":
+    if config.LLM_BACKEND == "together":
         api_key = dotenv_values(dotenv_path=".env").get("LLM_API_KEY")
         return APIClient(
             schema=schema,
             model=config.LLM_MODEL,
-            base_url=config.LLM_BASE_URL,
             api_key=api_key,
             max_workers=config.LLM_MAX_WORKERS,
         )

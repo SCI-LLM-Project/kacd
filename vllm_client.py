@@ -84,6 +84,16 @@ class VLLMClient:
     def map(self, list_of_messages, sampling_params=None):
         """Sequential fallback so callers can treat every backend uniformly - the
         local vLLM server is typically run with max-num-seqs=1, so concurrent
-        dispatch wouldn't help here the way it does for a hosted API."""
-        return [self(messages, sampling_params=sampling_params) for messages in list_of_messages]
+        dispatch wouldn't help here the way it does for a hosted API. generate()
+        already swallows response-parsing failures into [], but a connection-level
+        error (server unreachable) raises before that - catch it here too so one
+        bad item doesn't abort the rest of the batch, same convention as APIClient."""
+        results = []
+        for i, messages in enumerate(list_of_messages):
+            try:
+                results.append(self(messages, sampling_params=sampling_params))
+            except Exception as e:
+                print(f"Error in VLLMClient.map() item {i}, skipping: {e}")
+                results.append(None)
+        return results
 

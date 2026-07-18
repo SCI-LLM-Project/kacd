@@ -2,6 +2,7 @@
 neo4j/
 mmd/
 tmp/
+.env
 
 # Ignore contents of results directory
 results/*
