@@ -1,0 +1,317 @@
+# %%
+from neo4j import GraphDatabase, Result
+from tqdm import tqdm
+from typing import Dict, Any
+from langchain_community.graphs import Neo4jGraph
+from langchain_community.vectorstores import Neo4jVector
+
+import pandas as pd
+
+# %%
+# user defined imports
+from prompts import *
+import helpers
+
+# %%
+import warnings
+
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# %% [markdown]
+# ## Parameters
+
+# %%
+path = "~/kg_aug_causal_disc_exp"
+
+# %% [markdown]
+# ## Setting Up Graph
+
+# %%
+from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD,NEO4J_DATABASE, DIRECTORY
+
+driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD),database=NEO4J_DATABASE)
+
+def db_query(cypher: str, params: Dict[str, Any] = {}) -> pd.DataFrame:
+    """Executes a Cypher statement and returns a DataFrame"""
+    return driver.execute_query(
+        cypher, parameters_=params, result_transformer_=Result.to_df
+    )
+
+# %%
+graph = Neo4jGraph(
+    url=NEO4J_URI,
+    username=NEO4J_USERNAME,
+    password=NEO4J_PASSWORD,
+    database=NEO4J_DATABASE,
+    refresh_schema=False,
+    driver_config={"notifications_disabled_classifications": ["DEPRECATION"]}
+)
+
+# %% [markdown]
+# ## Setting up LLM
+
+# %%
+from pydantic import BaseModel, Field
+from typing import List
+
+class Reasoning_Step(BaseModel):
+    reasoning_step: str = Field(..., description="An intermediate reasoning step for breaking down the given context and query")
+
+class Answer(BaseModel):
+    reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
+    conclusion: bool = Field(..., description="The culminating final conclusion or answer to the question")
+
+# %%
+from vllm.sampling_params import SamplingParams
+from outlines import generate, samplers
+from vllm_client import VLLMClient
+
+generator = VLLMClient(schema=Answer)
+summarizer = VLLMClient()
+
+# %% [markdown]
+# # Local Retriever
+
+# %%
+# parameters for the local search query
+from config import topChunks, topCommunities, topRels, topEntities
+
+context = {}
+lc_retrieval_query = helpers.load_query("local_search.cypher")
+
+# %%
+# variables of interest
+with open("variable_definitions/default_definitions.json", "r") as file:
+    def_map = json.load(file)
+
+# %%
+db_query(
+    """
+    CREATE VECTOR INDEX vector IF NOT EXISTS
+    FOR (n:__Entity__)
+    ON n.embedding
+    OPTIONS {indexConfig: {
+      `vector.dimensions`: 768,
+      `vector.similarity_function`: "cosine"
+    }};
+    """
+)
+
+# %%
+db_query("SHOW INDEXES")
+
+# %%
+from langchain_community.embeddings import HuggingFaceEmbeddings
+import torch
+
+embedding = HuggingFaceEmbeddings(
+    model_name="pritamdeka/S-PubMedBert-MS-MARCO",
+    model_kwargs={'device': 'cuda' if torch.cuda.is_available() else 'cpu'},
+    encode_kwargs={'normalize_embeddings': True}
+)
+
+# %%
+lc_retrieval_query = helpers.load_query("local_search.cypher")
+lc_vector = Neo4jVector.from_existing_index(
+    embedding=embedding,
+    url=NEO4J_URI,
+    username=NEO4J_USERNAME,
+    password=NEO4J_PASSWORD,
+    database=NEO4J_DATABASE,
+    index_name="vector", # may need to alter
+    search_type="vector",
+    # keyword_index_name="keyword",
+    retrieval_query=lc_retrieval_query,
+)
+
+# %%
+from helpers import *
+from build_context import stringify_report, format_triplet, construct_query_context
+from config import query_context_window
+
+def retrieve_context_query(query) -> str:
+
+    res = lc_vector.similarity_search(
+        query,
+        k=topEntities,
+        params={
+            "topChunks": topChunks,
+            "topCommunities": topCommunities,
+            "topRels": topRels
+        }
+    )
+
+    metadata = res[0].metadata
+    reports = [stringify_report(report) for report in metadata["Reports"]]
+    chunks = metadata["Chunks"]
+    relationships = [format_triplet(triplet) for triplet in metadata["Relationships"]]
+
+    return construct_query_context(relationships, chunks, reports, max_context_window=query_context_window)
+
+# %%
+def local_retriever(query, var1, var2, summary, debug=False):
+    if debug:
+        print(reduce(query, var1, var2, summary, def_map))
+    response = generator(reduce(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+
+    return response.conclusion, helpers.reasoning_to_string(response)
+    
+
+# %%
+def llm_retriever(query, var1, var2, debug=False):
+    if debug:
+        print(predict(query, var1, var2, def_map))
+    response = generator(predict(query, var1, var2, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+    return response.conclusion, helpers.reasoning_to_string(response)
+
+
+# %%
+from promptsd.query_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
+
+def query_local_causality(row):
+    var1, var2, label = row['var1'], row['var2'], row["label"]
+    # bandaid for now
+    var1 = "Sleep disturbance" if var1 == "Sleep" else var1
+    var2 = "Sleep disturbance" if var2 == "Sleep" else var2
+        
+    pquery = plausibility_prompt(var1, var2)
+    preport = retrieve_context_query(pquery)
+    
+    aquery = association_prompt(var1, var2)
+    areport = retrieve_context_query(aquery)
+
+    tquery = temporality_prompt(var1, var2)
+    treport = retrieve_context_query(tquery)
+    
+    plausibility, preasoning = local_retriever(pquery, var1, var2, preport)
+    association, areasoning = local_retriever(aquery, var1, var2, areport)
+    temporality, treasoning = local_retriever(tquery, var1, var2, treport)
+    return [var1, var2, plausibility, preasoning, association, areasoning, temporality, treasoning, preport, areport, treport, label]
+
+# %%
+def query_llm_causality(row):
+    var1, var2, label = row['var1'], row['var2'], row["label"]
+    # bandaid for now
+    var1 = "Sleep disturbance" if var1 == "Sleep" else var1
+    var2 = "Sleep disturbance" if var2 == "Sleep" else var2
+        
+    pquery = plausibility_prompt(var1, var2)
+    aquery = association_prompt(var1, var2)
+    tquery = temporality_prompt(var1, var2)
+    plausibility, preasoning = llm_retriever(pquery, var1, var2)
+    association, areasoning = llm_retriever(aquery, var1, var2)
+    temporality, treasoning = llm_retriever(tquery, var1, var2)
+    return [var1, var2, plausibility, preasoning, association, areasoning, temporality, treasoning, label]
+
+# %%
+full = pd.read_csv(f"{path}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
+
+# %% [markdown]
+# # Experiments
+
+# %% [markdown]
+## LLM
+
+# %%
+tqdm.pandas(desc="Querying LLM")
+from prompts import *
+res = full.progress_apply(query_llm_causality, axis=1)
+
+# %%
+columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Label"
+llm_res = pd.DataFrame(res.to_list(), columns=columns)
+llm_res.to_csv("results/llm.csv")
+llm_res
+
+# %%
+from sklearn.metrics import f1_score
+print("RESULTS FOR LLM ONLY")
+print(f1_score(llm_res["Label"], llm_res["Plausibility"]))
+
+# # %%
+# print(llm_res["Plausibility"].value_counts())
+
+# %% [markdown]
+# ## Local Search
+
+# %%
+tqdm.pandas(desc="Querying Local Search")
+from prompts import *
+res = full.progress_apply(query_local_causality, axis=1)
+
+# %%
+columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Plausibility Report", "Association Report", "Temporality Report", "Label"
+local_res = pd.DataFrame(res.to_list(), columns=columns)
+local_res.to_csv("results/kgrag.csv")
+local_res
+
+# %%
+from sklearn.metrics import f1_score
+print("RESULTS FOR LOCAL")
+print(f1_score(local_res["Label"], local_res["Plausibility"]))
+
+# %%
+print(local_res["Plausibility"].value_counts())
+
+# %%
+import json
+
+# variables of interest
+with open("variable_definitions/default_definitions.json", "r") as file:
+    def_map = json.load(file)
+
+# %%
+from promptsd.query_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
+
+var1 = "Sex"
+var2 = "Anxiety"
+
+with open("raw_prompts/plausibility_prompt.txt", "w") as f:
+    print(plausibility_prompt(var1, var2), file=f)
+
+with open("raw_prompts/temporality_prompt.txt", "w") as f:
+    print(temporality_prompt(var1, var2), file=f)
+
+with open("raw_prompts/causal_lit_prompt.txt", "w") as f:
+    print(causal_lit_prompt(var1, var2), file=f)
+
+with open("raw_prompts/association_prompt.txt", "w") as f:
+    print(association_prompt(var1, var2), file=f)
+
+# %%
+pquery = plausibility_prompt(var1, var2)
+aquery = association_prompt(var1, var2)
+tquery = temporality_prompt(var1, var2)
+
+# %%
+from prompts import *
+with open("raw_prompts/kg+llm_prompt_plausibility.txt", "w") as f:
+    print(reduce(pquery, var1, var2, "", def_map), file=f)
+
+with open("raw_prompts/kg+llm_prompt_association.txt", "w") as f:
+    print(reduce(aquery, var1, var2, "", def_map), file=f)
+
+with open("raw_prompts/kg+llm_prompt_temporality.txt", "w") as f:
+    print(reduce(tquery, var1, var2, "", def_map), file=f)
+
+# %%
+with open("raw_prompts/llm+rag_prompt_plausibility.txt", "w") as f:
+    print(reduce_rag(pquery, var1, var2, "", def_map), file=f)
+
+with open("raw_prompts/llm+rag_prompt_association.txt", "w") as f:
+    print(reduce_rag(aquery, var1, var2, "", def_map), file=f)
+
+with open("raw_prompts/llm+rag_prompt_temporality.txt", "w") as f:
+    print(reduce_rag(tquery, var1, var2, "", def_map), file=f)
+
+# %%
+with open("raw_prompts/llm_prompt_plausibility.txt", "w") as f:
+    print(predict(pquery, var1, var2,  def_map), file=f)
+
+with open("raw_prompts/llm_prompt_association.txt", "w") as f:
+    print(predict(aquery, var1, var2,  def_map), file=f)
+
+with open("raw_prompts/llm_prompt_temporality.txt", "w") as f:
+    print(predict(tquery, var1, var2,  def_map), file=f)
+
+

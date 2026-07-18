@@ -1,0 +1,385 @@
+@prefix variables: <http://um.org/variables_backpain#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms#> .
+
+<http://um/tecnomod/ontology/BackPain_variables.owl> a owl:Ontology ;
+    rdfs:label "BackPain_variables" .
+
+variables:alcohol_consumption rdf:type owl:Class ;
+    rdfs:label "alcohol consumption" ;
+    skos:definition "The number of drinks per week refers to a substance use behavior that involves drinking an alcohol-containing product. This behavior includes the ingestion of alcoholic beverages, which encompasses social drinking and various drinking habits associated with the consumption of alcohol." ;
+    rdfs:subClassOf variables:substance_use_behaviour .
+
+variables:substance_use_behaviour rdf:type owl:Class ;
+    rdfs:label "substance use behaviour" ;
+    skos:definition "A consumption behaviour that involves ingesting a psychoactive substance into the body. substance use behaviour is not equated with substance abuse." .
+
+variables:drinking_behavior rdf:type owl:Class ;
+    rdfs:label "Drinking Behavior" ;
+    skos:definition "Behaviors associated with the ingesting of water and other liquids; includes rhythmic patterns of drinking (time intervals - onset and duration), frequency and satiety." ;
+    rdfs:subClassOf variables:alcohol_consumption .
+
+variables:bmi rdf:type owl:Class ;
+    rdfs:label "BMI" ;
+    skos:definition "Body Mass Index (BMI) is an individual's weight in kilograms divided by the square of the height in meters, serving as a general indicator of the body fat an individual is carrying based upon the ratio of weight to height. It is also defined as an indicator of body density determined by the relationship of body weight to body height, with BMI correlating with body fat. For adults, BMI categorizes individuals as follows: below 18.5 (underweight), 18.5-24.9 (normal), 25.0-29.9 (overweight), and 30.0 and above (obese)." ;
+    rdfs:subClassOf variables:PersonalAttribute, variables:BodyWeightsAndMeasures .
+
+variables:PersonalAttribute rdf:type owl:Class ;
+    rdfs:label "Personal Attribute" ;
+    skos:definition "The distinguishing qualities or prominent aspects of an individual person." .
+
+variables:BodyWeightsAndMeasures rdf:type owl:Class ;
+    rdfs:label "Body Weights and Measures" ;
+    skos:definition "Measurements of the height, weight, length, area, etc., of the human and animal body or its parts." .
+
+variables:comorbidity_index rdf:type owl:Class ;
+    rdfs:label "comorbidity_index" ;
+    skos:definition "The comorbidity index measures the number of comorbidities and serves as a rating scale for comorbidity in epidemiology. It is associated with the coexistence of two or more disease processes, which can be a diagnosis resulting from a diagnostic process targeting an additional health problem. This concept is reflected in vital statistics that include government records of live births, deaths, and other significant events within a jurisdiction." ;
+    rdfs:subClassOf variables:vital_statistics, variables:comorbidity, variables:diagnosis, variables:clinical_finding .
+
+variables:vital_statistics rdf:type owl:Class ;
+    rdfs:label "Vital Statistics" ;
+    skos:definition "Government records of live births, fetal deaths, marriages, divorces, and deaths that occur within that jurisdiction." .
+
+variables:comorbidity rdf:type owl:Class ;
+    rdfs:label "comorbidity" ;
+    skos:definition "The coexistence of two or more disease processes." ;
+    rdfs:subClassOf variables:comorbidity_index .
+
+variables:diagnosis rdf:type owl:Class ;
+    rdfs:label "diagnosis" ;
+    skos:definition "The representation of a conclusion of a diagnostic process." ;
+    rdfs:subClassOf variables:comorbidity_index .
+
+variables:clinical_finding rdf:type owl:Class ;
+    rdfs:label "clinical finding" ;
+    skos:definition "Clinical, laboratory or molecular evidence, or absence of evidence of disease." ;
+    rdfs:subClassOf variables:comorbidity_index .
+
+variables:education rdf:type owl:Class ;
+    rdfs:label "education" ;
+    skos:definition "The level of education of the participant is an indication of the years of schooling completed in graded public, private, or parochial schools, and in colleges, universities, or professional schools. This encompasses the highest level of education achievement for a person, reflecting their educational attainment and socioeconomic factors such as their economic and social position in relation to others, based on income, education, and occupation." ;
+    rdfs:subClassOf variables:socioeconomicFactors .
+
+variables:socioeconomicFactors rdf:type owl:Class ;
+    rdfs:label "Socioeconomic Factors" ;
+    rdfs:subClassOf variables:socioeconomicStatus .
+
+variables:socioeconomicStatus rdf:type owl:Class ;
+    rdfs:label "Socioeconomic Status" .
+
+variables:fear_avoidance rdf:type owl:Class ;
+    rdfs:label "Fear Avoidance" ;
+    skos:definition "Fear avoidance refers to the way in which a patient's fear avoidance beliefs about physical activity and work may affect and contribute to their low back pain and resulting disability. This concept encompasses feelings such as fright and fear, which are emotional responses to perceived threats or dangers, and avoidance behaviors, where individuals consciously or unconsciously refuse to encounter situations or activities that may provoke discomfort or pain." ;
+    rdfs:subClassOf variables:CHV_Concept, variables:Emotions, variables:Behavior .
+
+variables:CHV_Concept rdf:type owl:Class ;
+    rdfs:label "CHV Concept" .
+
+variables:Emotions rdf:type owl:Class ;
+    rdfs:label "Emotions" ;
+    skos:definition "Those affective states which can be experienced and have arousing and motivational properties." .
+
+variables:Behavior rdf:type owl:Class ;
+    rdfs:label "Behavior" ;
+    skos:definition "The actions or reactions of an object or organism, usually in relation to the environment or surrounding world of stimuli." .
+
+variables:financial_strain rdf:type owl:Class ;
+    rdfs:label "financial strain" ;
+    skos:definition "The level of financial situation of the participant, often serving as a proxy for socioeconomic status. It encompasses stress arising from personal financial concerns and an inability to meet basic living expenses for goods and services necessary to maintain health and/or well-being. It includes financial stress, which can manifest as burdensome debt, economic strain, and various forms of financial hardship." ;
+    rdfs:subClassOf variables:stressful_life_event .
+
+variables:stressful_life_event rdf:type owl:Class ;
+    rdfs:label "Stressful Life Event" .
+
+variables:other_problems_related_to_housing_and_economic_circumstances rdf:type owl:Class ;
+    rdfs:label "Other Problems Related to Housing and Economic Circumstances" ;
+    rdfs:subClassOf variables:financial_strain .
+
+variables:psychological_stress rdf:type owl:Class ;
+    rdfs:label "Psychological Stress" ;
+    rdfs:subClassOf variables:financial_strain .
+
+variables:financial_strain_related_to_housing rdf:type owl:Class ;
+    rdfs:label "Financial Strain Related to Housing" ;
+    rdfs:subClassOf variables:other_problems_related_to_housing_and_economic_circumstances .
+
+variables:pain_catastrophizing_score rdf:type owl:Class ;
+    rdfs:label "Pain Catastrophizing Score" ;
+    skos:definition "Pain catastrophizing is characterized by the tendency to magnify the threat value of a pain stimulus and to feel helpless in the presence of pain, as well as by a relative inability to prevent or inhibit pain-related thoughts in anticipation of, during, or following a painful event. It encompasses cognitive and emotional processes that magnify pain-related stimuli and feelings of helplessness, reflecting a generally pessimistic orientation." ;
+    rdfs:subClassOf variables:Attitude, variables:Anxiety, variables:Constitutional_Symptom .
+
+variables:Attitude rdf:type owl:Class ;
+    rdfs:label "Attitude" ;
+    skos:definition "An enduring, learned predisposition to behave in a consistent way toward a given class of objects, or a persistent mental and/or neural state of readiness to react to a certain class of objects, not as they are but as they are conceived to be." ;
+    rdfs:subClassOf variables:pain_catastrophizing_score .
+
+variables:Anxiety rdf:type owl:Class ;
+    rdfs:label "Anxiety" ;
+    skos:definition "Emotion characterized by feelings of tension, worried thoughts, and inadequacy in a social setting. Feelings or emotions of dread, apprehension, and impending disaster but not disabling as with ANXIETY DISORDERS. Condition of elevated sensory sensitivity, perception of risk of threats, and low threshold for stimuli." ;
+    rdfs:subClassOf variables:pain_catastrophizing_score .
+
+variables:Constitutional_Symptom rdf:type owl:Class ;
+    rdfs:label "Constitutional Symptom" ;
+    skos:definition "A symptom or manifestation indicating a systemic or general effect of a disease and that may affect the general well-being or status of an individual." ;
+    rdfs:subClassOf variables:pain_catastrophizing_score .
+
+variables:peg_score rdf:type owl:Class ;
+    rdfs:label "peg_score" ;
+    skos:definition "Pain interference and Pain intensity due to chronic low back pain." .
+
+variables:Pain_Interference rdf:type owl:Class ;
+    rdfs:label "Pain Interference" ;
+    rdfs:subClassOf variables:peg_score .
+
+variables:Pain_Intensity rdf:type owl:Class ;
+    rdfs:label "Pain Intensity" ;
+    rdfs:subClassOf variables:peg_score .
+
+variables:promis_anxiety rdf:type owl:Class ;
+    rdfs:label "PROMIS Anxiety" ;
+    skos:definition "Promis_anxiety focuses on fear, including worry and feelings of panic, anxious misery such as dread, hyperarousal characterized by tension, nervousness, and restlessness, as well as somatic symptoms related to arousal like cardiovascular symptoms and dizziness. It is also associated with intense feelings of nervousness, tension, or panic that often arise in response to interpersonal stresses, accompanied by worry about the negative effects of past unpleasant experiences and future negative possibilities. Individuals may feel fearful, apprehensive, or threatened by uncertainty, and may have fears of losing control." ;
+    rdfs:subClassOf variables:Research_or_Clinical_Assessment_Tool, variables:Quality_of_Life_and_Care_Diagnostic_Instrument, variables:Quality_of_Life_Measure, variables:Maladaptive_fear_related_cognitions, variables:Abnormal_fear_induced_behavior, variables:Abnormality_of_mental_function .
+
+variables:Research_or_Clinical_Assessment_Tool rdf:type owl:Class ;
+    rdfs:label "Research or Clinical Assessment Tool" .
+
+variables:Quality_of_Life_and_Care_Diagnostic_Instrument rdf:type owl:Class ;
+    rdfs:label "Quality of Life and Care Diagnostic Instrument" .
+
+variables:Quality_of_Life_Measure rdf:type owl:Class ;
+    rdfs:label "Quality of Life Measure" .
+
+variables:Maladaptive_fear_related_cognitions rdf:type owl:Class ;
+    rdfs:label "Maladaptive fear-related cognitions" .
+
+variables:Abnormal_fear_induced_behavior rdf:type owl:Class ;
+    rdfs:label "Abnormal fear-induced behavior" .
+
+variables:Abnormality_of_mental_function rdf:type owl:Class ;
+    rdfs:label "Abnormality of mental function" .
+
+variables:promis_depression rdf:type owl:Class ;
+    rdfs:label "PROMIS Depression" ;
+    skos:definition "Affective and cognitive manifestations of depression, including a project to develop standards for the collection and analysis of patient-reported health status data using a system of highly reliable, precise measures for physical, mental, and social well-being. Patients are asked a series of rigorously reviewed questions covering common domains and metrics across differing conditions and treatments. The questions can be administered in short forms or adaptively through computerized adaptive testing, allowing clinicians to better understand how treatments might affect the quality of life of their patients. This condition is characterized by pervasive dysphoric mood, loss of interests, and inability to experience pleasure, as well as frequent feelings of being down, miserable, and/or hopeless; difficulty recovering from such moods; pessimism about the future; pervasive shame; feelings of inferior self-worth; and thoughts of suicide and suicidal behavior." ;
+    rdfs:subClassOf variables:Research_or_Clinical_Assessment_Tool, variables:Quality_of_Life_and_Care_Diagnostic_Instrument, variables:Quality_of_Life_Measure, variables:Impairment_in_personality_functioning, variables:Abnormal_diminished_volition, variables:Abnormal_emotional_state .
+
+variables:Impairment_in_personality_functioning rdf:type owl:Class ;
+    rdfs:label "Impairment in Personality Functioning" ;
+    rdfs:subClassOf variables:promis_depression .
+
+variables:Abnormal_diminished_volition rdf:type owl:Class ;
+    rdfs:label "Abnormal Diminished Volition" ;
+    rdfs:subClassOf variables:promis_depression .
+
+variables:Abnormal_emotional_state rdf:type owl:Class ;
+    rdfs:label "Abnormal Emotional State" ;
+    rdfs:subClassOf variables:promis_depression .
+
+variables:sleep_disturbance rdf:type owl:Class ;
+    rdfs:label "sleep disturbance" ;
+    skos:definition "Assess self-reported perceptions of sleep quality, sleep depth, and restoration associated with sleep. The score is a summary score on the general perception of sleep quality. Sleep disorders are conditions that result in changes in the way that a person sleeps, leading to altered dream phenomena, which may later result in daytime hallucinations and delusions. A change from the patient's baseline sleeping pattern, in the hours slept and/or an alteration/dysfunction in the stages of sleep, characterizes sleep disturbance." ;
+    rdfs:subClassOf variables:Psychiatric_Disorder, variables:Intrapersonal_Causative_Factor, variables:disease, variables:mental_or_behavioural_disorder, variables:Domain .
+
+variables:Psychiatric_Disorder rdf:type owl:Class ;
+    rdfs:label "Psychiatric Disorder" ;
+    skos:definition "A disorder characterized by behavioral and/or psychological abnormalities, often accompanied by physical symptoms. The symptoms may cause clinically significant distress or impairment in social and occupational areas of functioning." ;
+    rdfs:subClassOf variables:mental_or_behavioural_disorder .
+
+variables:Intrapersonal_Causative_Factor rdf:type owl:Class ;
+    rdfs:label "Intrapersonal Causative Factor" ;
+    skos:definition "It refers to the things that can cause psychotic symptoms exclusively related to himself/herself." ;
+    rdfs:subClassOf variables:mental_or_behavioural_disorder .
+
+variables:disease rdf:type owl:Class ;
+    rdfs:label "disease" ;
+    skos:definition "A disease is a disposition that describes states of disease associated with a particular sample and/or organism." .
+
+variables:mental_or_behavioural_disorder rdf:type owl:Class ;
+    rdfs:label "mental or behavioural disorder" ;
+    skos:definition "A disease that has its basis in the disruption of mental process." .
+
+variables:Domain rdf:type owl:Class ;
+    rdfs:label "Domain" ;
+    skos:definition "An area of knowledge considered as a discrete unit for some purpose." .
+
+variables:hasSubstanceUseBehavior rdf:type owl:ObjectProperty ;
+    rdfs:label "has substance use behavior" ;
+    rdfs:domain variables:alcohol_consumption ;
+    rdfs:range variables:substance_use_behaviour .
+
+variables:hasDrinkingBehavior rdf:type owl:ObjectProperty ;
+    rdfs:label "has drinking behavior" ;
+    rdfs:domain variables:alcohol_consumption ;
+    rdfs:range variables:drinking_behavior .
+
+variables:hasEducation rdf:type owl:ObjectProperty ;
+    rdfs:label "has Education" ;
+    rdfs:domain variables:socioeconomicFactors ;
+    rdfs:range variables:education .
+
+variables:hasSocioeconomicStatus rdf:type owl:ObjectProperty ;
+    rdfs:label "has Socioeconomic Status" ;
+    rdfs:domain variables:education ;
+    rdfs:range variables:socioeconomicStatus .
+
+variables:Analogy rdf:type owl:Class ;
+    rdfs:label "Analogy" ;
+    skos:definition "The use of analogies or similarities between the observed association and any other associations. An analogy involves an inference that if two or more things agree with one another in some respects, they will probably agree in others. It is a resemblance in some particulars between things otherwise unlike and serves as a basis for the creation of another form. It also includes correspondence in function between anatomical parts of different structure and origin." ;
+    skos:altLabel "analogy" ;
+    dcterms:source <http://www.cognitiveatlas.org/ontology/cogat.owl#CAO_00126>, <http://purl.obolibrary.org/obo/HOM_0000004> ;
+    rdfs:subClassOf variables:Inference, variables:Homoplasy .
+
+variables:Inference rdf:type owl:Class ;
+    rdfs:label "Inference" .
+
+variables:Homoplasy rdf:type owl:Class ;
+    rdfs:label "Homoplasy" .
+
+variables:Coherence rdf:type owl:Class ;
+    rdfs:label "Coherence" ;
+    skos:definition "Consistent findings observed by different persons in different places with different samples strengthens the likelihood of an effect." .
+
+variables:Observation rdf:type owl:Class ;
+    rdfs:label "Observation" ;
+    rdfs:subClassOf variables:Coherence .
+
+variables:SampleConsistency rdf:type owl:Class ;
+    rdfs:label "Sample Consistency" ;
+    rdfs:subClassOf variables:Coherence .
+
+variables:dose_response_relationship rdf:type owl:Class ;
+    rdfs:label "Dose Response Relationship" ;
+    skos:definition "Greater exposure should generally lead to greater incidence of the effect. However, in some cases, the mere presence of the factor can trigger the effect. In other cases, an inverse proportion is observed: greater exposure leads to lower incidence. A quality inhering in a bearer by virtue of whether the bearer's disposition to react to a stimulus or an agent." ;
+    skos:altLabel "responsivity" ;
+    skos:altLabel "reactivity" ;
+    skos:altLabel "response" ;
+    dcterms:source <http://purl.obolibrary.org/obo/PATO_0000077> ;
+    rdfs:subClassOf variables:organismal_quality .
+
+variables:organismal_quality rdf:type owl:Class ;
+    rdfs:label "Organismal Quality" .
+
+variables:hasDoseResponseRelationship rdf:type owl:ObjectProperty ;
+    rdfs:label "has dose-response relationship" ;
+    rdfs:domain variables:organismal_quality ;
+    rdfs:range variables:dose_response_relationship .
+
+variables:EffectSize rdf:type owl:Class ;
+    rdfs:label "Effect Size" ;
+    skos:definition "A small association does not mean that there is not a causal effect, though the larger the association, the more likely that it is causal. Effect size estimate is a data item about the direction and strength of the consequences of a causative agent as explored by statistical methods. Those methods produce estimates of the effect size, e.g. confidence interval." ;
+    skos:altLabel "effect size" ;
+    dcterms:source <http://purl.obolibrary.org/obo/STATO_0000085> ;
+    rdfs:subClassOf variables:MeasurementDatum .
+
+variables:MeasurementDatum rdf:type owl:Class ;
+    rdfs:label "Measurement Datum" .
+
+variables:hasEffectSize rdf:type owl:ObjectProperty ;
+    rdfs:label "has effect size" ;
+    rdfs:domain variables:MeasurementDatum ;
+    rdfs:range variables:EffectSize .
+
+variables:ExperimentalEvidence rdf:type owl:Class ;
+    rdfs:label "Experimental Evidence" ;
+    skos:definition "Occasionally it is possible to appeal to experimental evidence. Experimental evidence is a type of evidence that results from the manipulation of variables to discover cause and effect. It is the output of a scientific procedure performed to make a discovery, test a hypothesis, or demonstrate a known fact." ;
+    skos:altLabel "experimental procedures", "method", "experimental methods", "experimental", "experimental section", "methodology", "methods" ;
+    dcterms:source <http://purl.obolibrary.org/obo/ECO_0000006>, <http://purl.obolibrary.org/obo/IAO_0000317> ;
+    rdfs:subClassOf variables:Evidence, variables:InformationContentEntity, variables:DocumentPart .
+
+variables:Evidence rdf:type owl:Class ;
+    rdfs:label "Evidence" .
+
+variables:InformationContentEntity rdf:type owl:Class ;
+    rdfs:label "Information Content Entity" .
+
+variables:DocumentPart rdf:type owl:Class ;
+    rdfs:label "Document Part" .
+
+variables:plausibility rdf:type owl:Class ;
+    rdfs:label "Plausibility" ;
+    skos:definition "A plausible mechanism between cause and effect is helpful (but Hill noted that knowledge of the mechanism is limited by current knowledge)." .
+
+variables:Mechanism rdf:type owl:Class ;
+    rdfs:label "Mechanism" ;
+    rdfs:subClassOf variables:plausibility ;
+    skos:altLabel "Plausible Mechanism" .
+
+variables:CauseEffectRelation rdf:type owl:Class ;
+    rdfs:label "Cause Effect Relation" ;
+    rdfs:subClassOf variables:plausibility ;
+    skos:altLabel "Cause and Effect Relationship" .
+
+variables:hasMechanism rdf:type owl:ObjectProperty ;
+    rdfs:label "has mechanism" ;
+    rdfs:domain variables:plausibility ;
+    rdfs:range variables:Mechanism .
+
+variables:hasCauseEffectRelation rdf:type owl:ObjectProperty ;
+    rdfs:label "has cause-effect relation" ;
+    rdfs:domain variables:plausibility ;
+    rdfs:range variables:CauseEffectRelation .
+
+variables:Reproducibility rdf:type owl:Class ;
+    rdfs:label "Reproducibility" ;
+    skos:definition "Consistent findings observed by different persons in different places with different samples strengthens the likelihood of an effect. It involves presenting data and/or analysis in a format that can be comprehended by and reproduced for stakeholders; this can include anything related to reporting, building dashboards, creating data products, or repository sharing for analysis code. Additionally, it is the ability to yield similar results given a set of constraints." ;
+    skos:altLabel "Reproducibility" ;
+    dcterms:source <http://bigdatau.org/dseo#reproducibility>, <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C15318> ;
+    rdfs:subClassOf variables:DataScienceProcess, variables:PropertyOrAttribute .
+
+variables:DataScienceProcess rdf:type owl:Class ;
+    rdfs:label "Data Science Process" .
+
+variables:PropertyOrAttribute rdf:type owl:Class ;
+    rdfs:label "Property or Attribute" .
+
+variables:hasReproducibility rdf:type owl:ObjectProperty ;
+    rdfs:label "has reproducibility" ;
+    rdfs:domain variables:DataScienceProcess ;
+    rdfs:range variables:Reproducibility .
+
+variables:specificity rdf:type owl:Class ;
+    rdfs:label "Specificity" ;
+    skos:definition "Causation is likely if there is a very specific population at a specific site and disease with no other likely explanation. The more specific an association between a factor and an effect is, the bigger the probability of a causal relationship. Specificity is a measurement datum qualifying a binary classification test and is computed by subtracting the false positive rate from one. It refers to the proportion of negatives in a binary classification test which are correctly identified." ;
+    skos:altLabel "specificity" ;
+    dcterms:source <http://purl.obolibrary.org/obo/STATO_0000134>, <http://purl.obolibrary.org/obo/OBCS_0000059> ;
+    rdfs:subClassOf variables:measurement_datum, variables:figure_of_merit .
+
+variables:measurement_datum rdf:type owl:Class ;
+    rdfs:label "Measurement Datum" .
+
+variables:figure_of_merit rdf:type owl:Class ;
+    rdfs:label "Figure of Merit" .
+
+variables:Temporality rdf:type owl:Class ;
+    rdfs:label "Temporality" ;
+    skos:definition "The effect has to occur after the cause (and if there is an expected delay between the cause and expected effect, then the effect must occur after that delay)." .
+
+variables:Cause rdf:type owl:Class ;
+    rdfs:label "Cause" .
+
+variables:Effect rdf:type owl:Class ;
+    rdfs:label "Effect" .
+
+variables:hasCause rdf:type owl:ObjectProperty ;
+    rdfs:label "has cause" ;
+    rdfs:domain variables:Temporality ;
+    rdfs:range variables:Cause .
+
+variables:hasEffect rdf:type owl:ObjectProperty ;
+    rdfs:label "has effect" ;
+    rdfs:domain variables:Temporality ;
+    rdfs:range variables:Effect .
+
+variables:hasCoherence rdf:type owl:ObjectProperty ;
+    rdfs:label "has coherence" ;
+    rdfs:domain variables:Observation ;
+    rdfs:range variables:Coherence .
+
+variables:hasSampleConsistency rdf:type owl:ObjectProperty ;
+    rdfs:label "has sample consistency" ;
+    rdfs:domain variables:Observation ;
+    rdfs:range variables:SampleConsistency .

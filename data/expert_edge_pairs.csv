@@ -1,0 +1,65 @@
+Var1,Var2
+Age,CCI
+Age,Obesity
+Age,Anxiety
+Age,Depression
+Age,Sleep disturbance
+Age,Financial_level
+Age,Smoking
+Age,Catastrophizing
+Age,Fear_avoidance
+Age,Alcohol
+Age,PEG
+Alcohol,Obesity
+Alcohol,CCI
+Alcohol,Financial_level
+Alcohol,Sleep disturbance
+Anxiety,CCI
+Anxiety,Smoking
+Anxiety,PEG
+Anxiety,Sleep disturbance
+Anxiety,Alcohol
+Catastrophizing,Anxiety
+Catastrophizing,Depression
+Catastrophizing,PEG
+Depression,CCI
+Depression,Smoking
+Depression,PEG
+Depression,Alcohol
+Education,CCI
+Education,Obesity
+Education,Anxiety
+Education,Depression
+Education,Financial_level
+Education,Smoking
+Education,PEG
+Education,Alcohol
+Fear_avoidance,Anxiety
+Fear_avoidance,Depression
+Fear_avoidance,PEG
+Financial_level,Obesity
+Financial_level,Anxiety
+Financial_level,Depression
+Financial_level,Sleep disturbance
+Financial_level,PEG
+Obesity,CCI
+Obesity,Anxiety
+Obesity,Depression
+Obesity,PEG
+Sex,CCI
+Sex,Obesity
+Sex,Anxiety
+Sex,Depression
+Sex,Sleep disturbance
+Sex,Education
+Sex,Financial_level
+Sex,Smoking
+Sex,Catastrophizing
+Sex,Fear_avoidance
+Sex,PEG
+Sex,Alcohol
+Sleep disturbance,CCI
+Sleep disturbance,Depression
+Sleep disturbance,Smoking
+Sleep disturbance,PEG
+Smoking,PEG

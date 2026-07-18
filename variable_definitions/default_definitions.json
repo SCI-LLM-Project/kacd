@@ -1,0 +1,16 @@
+{
+    "Sex": "Sex: either of the two main categories (male and female) into which humans and most other living things are divided on the basis of their reproductive functions.",
+    "PEG": "PEG score: A index measuring pain interference and pain intensity due to chronic low back pain",
+    "Sleep disturbance": "Sleep disturbance: assess self-reported perceptions of sleep quality, sleep depth, and restoration associated with sleep. The score is a summary score on the general perception of sleep quality",
+    "Depression": "PROMIS depression: affective and cognitive manifestations of depression",
+    "Anxiety": "PROMIS anxiety: focuses on fear (e.g., worry, feelings of panic), anxious misery (e.g., dread), hyperarousal (e.g., tension, nervousness, restlessness), and somatic symptoms related to arousal (e.g., cardiovascular symptoms, dizziness).",
+    "Obesity": "BMI or obesity or being overweight. This should perhaps be described as weight or BMI associations",
+    "Alcohol": "Alcohol: alcohol consumption (number of drinks per week)",
+    "Fear_avoidance": "Fear avoidance: patient reported questionnaire which specifically focuses on how a patient's fear avoidance beliefs about physical activity and work may affect and contribute to their low back pain and resulting disability",
+    "Catastrophizing": "Pain catastrophizing score: Pain catastrophizing is characterized by the tendency to magnify the threat value of a pain stimulus and to feel helpless in the presence of pain, as well as by a relative inability to prevent or inhibit pain-related thoughts in anticipation of, during, or following a painful event",
+    "CCI": "CCI: A comorbidity index. It measures the number of comorbidities",
+    "Education": "Education: The level of education of the participant",
+    "Financial_level": "Financial Level: level of financial situation of the participant. Often a proxy for socioeconomic status",
+    "Age": "Age: The age of the patient",
+    "Smoking": "Smoking: the action or habit of inhaling and exhaling the smoke of tobacco by sucking on the end of a lit cigarette, cigar, pipe, etc."
+}

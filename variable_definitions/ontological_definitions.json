@@ -1,0 +1,31 @@
+{
+    "_comment": "Sex, age, and smoking werent variables originally in the ontology. The variable names in this file have also been altered to match the variable names originally in Abel's dataset",
+    
+    "Sex": "Sex: either of the two main categories (male and female) into which humans and most other living things are divided on the basis of their reproductive functions.",
+
+    "Age": "Age: The age of the patient",
+    
+    "Smoking": "Smoking: the action or habit of inhaling and exhaling the smoke of tobacco by sucking on the end of a lit cigarette, cigar, pipe, etc.",
+    
+    "Alcohol": "Alcohol: Alcohol consumption refers to the number of drinks per week, representing a substance use behavior that involves drinking an alcohol-containing product. This behavior includes the ingestion of alcoholic beverages, encompassing social drinking and various drinking habits. It is a subset of substance use behavior, which broadly involves ingesting psychoactive substances into the body, distinct from substance abuse. This contextualizes alcohol consumption within broader patterns of substance use.",
+
+    "Obesity": "BMI: Body Mass Index (BMI) is a measure of an individual's weight in kilograms divided by the square of their height in meters, serving as a general indicator of body fat based on the weight-to-height ratio. It is categorized for adults as underweight, normal weight, overweight, and obese. As a personal attribute, BMI reflects distinguishing qualities of an individual and is part of body weights and measures, which include various physical measurements of the human body.",
+    
+    "CCI": "CCI: The comorbidity index is a measure used in epidemiology to assess the number of coexisting diseases, serving as a rating scale for comorbidity. It is associated with the coexistence of two or more disease processes and is part of vital statistics, which include government records of significant health-related events. It also relates to diagnosis and clinical findings, indicating a systemic approach to understanding health conditions.",
+    
+    "Education": "Education: Education is defined as the level of schooling completed by a participant, reflecting years of study in various educational institutions. It encompasses the highest level of educational attainment and is a significant socioeconomic factor, indicating a person's economic and social position relative to others based on income, education, and occupation. This highlights the role of education in shaping socioeconomic status.",
+    
+    "Fear_avoidance": "Fear Avoidance: Fear avoidance describes how a patient's beliefs about physical activity and work can influence their experience of low back pain and disability. It involves emotional responses such as fear and fright, leading to avoidance behaviors that prevent encounters with discomfort or pain. As part of emotions and behavior, fear avoidance underscores the affective and motivational properties influencing an individual's actions in response to perceived threats.",
+    
+    "Financial_level": "Financial Strain: Financial strain refers to the participant's financial situation, often indicating socioeconomic status. It includes stress from financial concerns and the inability to meet basic living expenses, encompassing burdensome debt and economic hardship. As a stressful life event, financial strain reflects challenges impacting health and well-being, highlighting the interconnectedness of financial and social stressors.",
+    
+    "Catastrophizing": "Pain Catastrophizing: Pain catastrophizing is the tendency to magnify the threat of pain and feel helpless in its presence, characterized by difficulty inhibiting pain-related thoughts. It involves cognitive and emotional processes that enhance pain perception and reflect a pessimistic outlook. As part of attitudes, anxiety, and constitutional symptoms, it provides insights into the psychological dimensions of pain experience.",
+    
+    "PEG": "PEG: The PEG score measures pain interference and intensity due to chronic low back pain, focusing on the impact of pain on daily functioning. It highlights the importance of assessing both the severity of pain and its effects on a person's life, providing a comprehensive view of pain-related challenges.",
+    
+    "Anxiety": "PROMIS Anxiety: PROMIS Anxiety assesses fear, worry, panic, and hyperarousal, including somatic symptoms like cardiovascular issues. It evaluates intense nervousness and apprehension in response to stress, reflecting maladaptive fear-related cognitions and abnormal fear-induced behavior. This tool is part of research and clinical assessment, quality of life measures, and mental function abnormalities, offering a detailed understanding of anxiety's impact on well-being.",
+    
+    "Depression": "PROMIS Depression: PROMIS Depression evaluates affective and cognitive aspects of depression, using reliable measures for physical, mental, and social well-being. It covers symptoms like dysphoric mood, loss of interest, and hopelessness, aiding in understanding treatment effects on quality of life. As a research and clinical tool, it addresses personality functioning impairments, diminished volition, and emotional state abnormalities, providing a comprehensive depression assessment.",
+    
+    "Sleep disturbance": "Sleep Disturbance: Sleep disturbance assesses self-reported perceptions of sleep quality and depth, summarizing general sleep quality. It involves changes in sleep patterns and stages, leading to altered dream phenomena and potential daytime issues. As part of psychiatric disorders, intrapersonal factors, and mental or behavioral disorders, sleep disturbance highlights the intricate relationship between sleep and mental health."
+}
