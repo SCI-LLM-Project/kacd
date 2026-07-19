@@ -1,0 +1,51 @@
+{
+  "json_schema": {
+    "name": "Disambiguate",
+    "schema": {
+      "$defs": {
+        "DuplicateEntities": {
+          "additionalProperties": false,
+          "properties": {
+            "entities": {
+              "description": "Entities that represent the same object or real-world entity and should be merged",
+              "items": {
+                "type": "string"
+              },
+              "title": "Entities",
+              "type": "array"
+            }
+          },
+          "required": [
+            "entities"
+          ],
+          "title": "DuplicateEntities",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "merge_entities": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/DuplicateEntities"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Lists of entities that represent the same object or real-world entity and should be merged",
+          "title": "Merge Entities"
+        }
+      },
+      "required": [
+        "merge_entities"
+      ],
+      "title": "Disambiguate",
+      "type": "object"
+    }
+  },
+  "type": "json_schema"
+}

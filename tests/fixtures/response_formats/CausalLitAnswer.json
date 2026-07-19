@@ -1,0 +1,52 @@
+{
+  "json_schema": {
+    "name": "CausalLitAnswer",
+    "schema": {
+      "$defs": {
+        "Reasoning_Step": {
+          "additionalProperties": false,
+          "properties": {
+            "reasoning_step": {
+              "description": "An intermediate reasoning step for breaking down the given context and query",
+              "title": "Reasoning Step",
+              "type": "string"
+            }
+          },
+          "required": [
+            "reasoning_step"
+          ],
+          "title": "Reasoning_Step",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "conclusion": {
+          "description": "The culminating final conclusion or answer to the question",
+          "enum": [
+            "A",
+            "B",
+            "C"
+          ],
+          "title": "Conclusion",
+          "type": "string"
+        },
+        "reasoning": {
+          "description": "List of reasoning steps",
+          "items": {
+            "$ref": "#/$defs/Reasoning_Step"
+          },
+          "title": "Reasoning",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reasoning",
+        "conclusion"
+      ],
+      "title": "CausalLitAnswer",
+      "type": "object"
+    }
+  },
+  "type": "json_schema"
+}

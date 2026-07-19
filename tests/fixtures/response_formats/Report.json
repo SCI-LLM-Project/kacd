@@ -1,0 +1,78 @@
+{
+  "json_schema": {
+    "name": "Report",
+    "schema": {
+      "$defs": {
+        "Finding": {
+          "additionalProperties": false,
+          "properties": {
+            "explanation": {
+              "description": "A detailed explanation supporting the finding.",
+              "minLength": 1,
+              "title": "Finding Explanation",
+              "type": "string"
+            },
+            "summary": {
+              "description": "Summary of the key insight about the community.",
+              "minLength": 1,
+              "title": "Finding Summary",
+              "type": "string"
+            }
+          },
+          "required": [
+            "summary",
+            "explanation"
+          ],
+          "title": "Finding",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "detailed_findings": {
+          "description": "A list of 5-10 key insights about the community. Each insight should have a short summary followed by multiple paragraphs of explanatory text grounded according to the grounding rules below. Be comprehensive.",
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "maxItems": 10,
+          "minItems": 5,
+          "title": "Detailed Findings",
+          "type": "array"
+        },
+        "impact_severity_rating": {
+          "description": "a float score between 0-10 that represents the severity of IMPACT posed by entities within the community.  IMPACT is the scored importance of a community.",
+          "title": "Impact Severity Rating",
+          "type": "number"
+        },
+        "rating_explanation": {
+          "description": "Give a single sentence explanation of the IMPACT severity rating.",
+          "minLength": 1,
+          "title": "Rating Explanation",
+          "type": "string"
+        },
+        "summary": {
+          "description": "An executive summary of the community's overall structure, how its entities are related to each other, and significant information associated with its entities.",
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "description": "community's name that represents its key entities - title should be short but specific. When possible, include representative named entities in the title.",
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "summary",
+        "impact_severity_rating",
+        "rating_explanation",
+        "detailed_findings"
+      ],
+      "title": "Report",
+      "type": "object"
+    }
+  },
+  "type": "json_schema"
+}
