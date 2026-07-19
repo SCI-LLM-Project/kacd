@@ -172,6 +172,9 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
 
         except Exception as e:
             print(f"Error processing {pair}: {e}")
+            # we return true here, because the knowledge system still voted for that direction, regardless
+            # of whether it couldn't break the tie.
+            # in practice, rarely errors.
             return {
                 'Var1': pair[0],
                 'Var2': pair[1],
