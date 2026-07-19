@@ -19,6 +19,10 @@ For a runnable, end-to-end example of the whole pipeline (KG construction -> pre
 - run query_directions_without_proto.py and/or query_directions_with_proto.py
     - the proto model results are in `results/proto.csv`. This is used in `query_directions_with_proto.csv`
 
+# Together AI Deployment Configuration
+- mistral-7b-instruct-v0.3
+- min 3 replicas max 3 replicas
+
 # how to dump a database
 
 This creates a consistent backup file:
