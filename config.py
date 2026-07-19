@@ -25,7 +25,7 @@ topEntities = 20
 # "meta-llama/Llama-3.3-70B-Instruct-Turbo", or a fine-tuned model's dedicated
 # endpoint name). API key is not stored here - see .env / LLM_API_KEY.
 LLM_BACKEND = "together"
-LLM_MODEL = "damonlin93410-8d4a/test"
+LLM_MODEL = "damonlin93410-8d4a/mistral-7b-instruct"
 LLM_MAX_WORKERS = 32
 
 # Tokenizer used for approximate token-count budgeting (context-window packing in
