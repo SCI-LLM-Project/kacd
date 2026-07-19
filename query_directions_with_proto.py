@@ -27,6 +27,8 @@ rag_df = predictions[predictions['context'] == 'rag_full.csv']
 
 # %%
 # Define columns to drop for each type
+# causal literature IS resolved here (unlike query_directions_without_proto.py)
+# because we want to compare it against the proto model
 plausibility_drop = ['Association', 'Association Reasoning', 'Temporality', 'Temporality Reasoning', 'context', "Causal Literature Prediction", "Causal Literature Prediction Reasoning"]
 association_drop = ['Plausibility', 'Plausibility Reasoning', 'Temporality', 'Temporality Reasoning', 'context', "Causal Literature Prediction", "Causal Literature Prediction Reasoning"]
 temporality_drop = ['Plausibility', 'Plausibility Reasoning', 'Association', 'Association Reasoning', 'context', "Causal Literature Prediction", "Causal Literature Prediction Reasoning"]
@@ -68,12 +70,12 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
         metric_report_col: Name of the Report column
         report_type: whether to use RAG, KG-RAG, or LLM (no report)
         generator: LLM client (from llm.factory.get_client) for LLM queries
-        prompt_type: Type of prompt to use ('Plausibility', 'Association', 'Temporality', 'Causal')
-    
+        prompt_func: Prompt builder (var1, var2, report) -> messages, from prompts_directions
+
     Returns:
         DataFrame with resolved directional edges and Direction_Resolved flag
     """
-    
+
     # Self-merge to find pairs with both directions
     # this will drop pairs of variables that are constrained to one direction (Age, Sex, PEG)
     merged = df.merge(
@@ -82,7 +84,17 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
         right_on=['Var2', 'Var1'],
         suffixes=('_fwd', '_rev')
     )
-    
+
+    # pairs present in only one direction never appear in the self-merge; they only
+    # survive via the Sex/Age/PEG filters below - warn if any would be silently dropped
+    all_pairs = set(zip(df['Var1'], df['Var2']))
+    unrescued = [
+        (v1, v2) for (v1, v2) in all_pairs
+        if (v2, v1) not in all_pairs and v1 not in ("Sex", "Age") and v2 != "PEG"
+    ]
+    if unrescued:
+        print(f"WARNING: {len(unrescued)} one-directional pair(s) not covered by the Sex/Age/PEG filters will be dropped: {sorted(unrescued)}")
+
     # Filter for different scenarios
     fwd_true_rev_false = merged[
         ((merged[f'{metric_col}_fwd'] == True) | (merged['Proto_fwd'] == True)) &
@@ -140,6 +152,8 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
     
     print(f"Found {len(pairs_to_resolve)} bidirectional pairs to resolve for {metric_col} using prompt")
 
+    failed_pairs = []
+
     def _resolve_pair(pair):
         try:
             var1, var2 = pair
@@ -166,6 +180,7 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
 
         except Exception as e:
             print(f"Error processing {pair}: {e}")
+            failed_pairs.append(pair)
             # we return true here, because the knowledge system still voted for that direction, regardless
             # of whether it couldn't break the tie.
             # in practice, rarely errors.
@@ -184,6 +199,10 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
         _resolve_pair, pairs_to_resolve, max_workers=config.LLM_MAX_WORKERS, desc=f"Resolving {metric_col}"
     )
 
+    if failed_pairs:
+        print(f"WARNING: {len(failed_pairs)}/{len(results)} direction resolutions failed for {metric_col}; "
+              f"failed pairs emitted in arbitrary (alphabetical) direction with the error text as reasoning: {sorted(failed_pairs)}")
+
     # Combine with resolved directions
     if results:
         resolved_df = pd.DataFrame(results)
@@ -193,19 +212,6 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
     
     return final_df
 
-
-# Example usage:
-# kg_llm_plausibility_resolved = resolve_bidirectional_edges(
-#     kg_llm_plausibility, 'Plausibility', 'Plausibility Reasoning', generator, 'Plausibility'
-# )
-# 
-# llm_association_resolved = resolve_bidirectional_edges(
-#     llm_association, 'Association', 'Association Reasoning', generator, 'Association'
-# )
-# 
-# rag_temporality_resolved = resolve_bidirectional_edges(
-#     rag_temporality, 'Temporality', 'Temporality Reasoning', generator, 'Temporality'
-# )
 
 # %%
 # Resolve bidirectional edges for all contexts and metrics
