@@ -26,7 +26,7 @@ topEntities = 20
 # endpoint name). API key is not stored here - see .env / LLM_API_KEY.
 LLM_BACKEND = "together"
 LLM_MODEL = "damonlin93410-8d4a/mistral-7b-instruct"
-LLM_MAX_WORKERS = 32
+LLM_MAX_WORKERS = 24
 # Max tokens the model is allowed to generate per response (output only - has
 # no bearing on prompt/input size). Applied system-wide via get_client(); every
 # call site already relied on this same value as APIClient's own default, this
