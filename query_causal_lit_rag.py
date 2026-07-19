@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 
 import util.helpers as helpers
-from config import PROJECT_ROOT, def_map
+from config import PROJECT_ROOT, def_map, RESULT_DIR
 # corpus chunking, embedding, and the FAISS index all live in the shared
 # retriever module (built once at import time)
 from context_construction.retriever_rag import retrieve_rag_context
@@ -63,5 +63,6 @@ rows = [
 # %%
 columns = "Var1", "Var2", "Causal Literature", "Causal Literature Reasoning", "Causal Literature Report", "Label"
 rag_res = pd.DataFrame(rows, columns=columns)
-rag_res.to_csv("results/llm+rag_full_causal_literature.csv")
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+rag_res.to_csv(RESULT_DIR / "llm+rag_full_causal_literature.csv")
 rag_res

@@ -13,6 +13,7 @@ from datetime import datetime
 
 import pandas as pd
 
+from config import RESULT_DIR
 from util.helpers import consolidate_causal_literature
 
 LOG_PATH = "log/log.out"
@@ -41,14 +42,14 @@ run("query_causal_lit_llm.py")
 run("query_causal_lit_rag.py")
 
 # Combine all results
-kgrag = pd.read_csv("results/kgrag.csv", index_col=0).drop(columns=["Label"])
-llm = pd.read_csv("results/llm.csv", index_col=0).drop(columns=["Label"])
-rag = pd.read_csv("results/rag.csv", index_col=0).drop(columns=["Label"])
+kgrag = pd.read_csv(RESULT_DIR / "kgrag.csv", index_col=0).drop(columns=["Label"])
+llm = pd.read_csv(RESULT_DIR / "llm.csv", index_col=0).drop(columns=["Label"])
+rag = pd.read_csv(RESULT_DIR / "rag.csv", index_col=0).drop(columns=["Label"])
 
-kgrag_cl = pd.read_csv("results/kg+rag_full_causal_literature.csv", index_col=0).drop(columns=["Label"])
-llm_cl = pd.read_csv("results/llm_full_causal_literature.csv", index_col=0).drop(columns=["Label"])
+kgrag_cl = pd.read_csv(RESULT_DIR / "kg+rag_full_causal_literature.csv", index_col=0).drop(columns=["Label"])
+llm_cl = pd.read_csv(RESULT_DIR / "llm_full_causal_literature.csv", index_col=0).drop(columns=["Label"])
 llm_cl["Causal Literature Report"] = ''
-rag_cl = pd.read_csv("results/llm+rag_full_causal_literature.csv", index_col=0).drop(columns=["Label"])
+rag_cl = pd.read_csv(RESULT_DIR / "llm+rag_full_causal_literature.csv", index_col=0).drop(columns=["Label"])
 
 # Apply to all causal literature dataframes
 kgrag_cl = consolidate_causal_literature(kgrag_cl)
@@ -67,7 +68,8 @@ rag['context'] = 'rag_full.csv'
 # Concatenate all dataframes
 consolidated = pd.concat([kgrag, llm, rag], ignore_index=True)
 
-consolidated.to_csv("results/results_undirected_combined.csv")
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+consolidated.to_csv(RESULT_DIR / "results_undirected_combined.csv")
 
 # Generate directed results
 run("query_directions_without_proto.py")

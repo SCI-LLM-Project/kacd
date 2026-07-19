@@ -8,7 +8,7 @@ from tqdm import tqdm
 from prompts.query_prompts.causal_literature_prompts import *
 from prompts.query_prompts.metric_prompts import causal_lit_prompt
 import util.helpers as helpers
-from config import PROJECT_ROOT, def_map
+from config import PROJECT_ROOT, def_map, RESULT_DIR
 from models.AnswerSchema import CausalLitAnswer as Answer
 from llm.factory import get_client
 # neo4j connection, vector index, embeddings, and the local-search context
@@ -72,5 +72,6 @@ rows = [
 # %%
 columns = "Var1", "Var2", "Causal Literature",  "Causal Literature Reasoning", "Causal Literature Report", "Label"
 local_res = pd.DataFrame(rows, columns=columns)
-local_res.to_csv("results/kg+rag_full_causal_literature.csv")
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+local_res.to_csv(RESULT_DIR / "kg+rag_full_causal_literature.csv")
 local_res

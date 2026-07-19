@@ -8,7 +8,7 @@ from sklearn.metrics import f1_score
 from prompts.query_prompts.base_prompts import *
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
 import util.helpers as helpers
-from config import PROJECT_ROOT, def_map
+from config import PROJECT_ROOT, def_map, RESULT_DIR
 from models.AnswerSchema import BooleanAnswer as Answer
 from llm.factory import get_client
 
@@ -68,7 +68,8 @@ rows = [
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Label"
 llm_res = pd.DataFrame(rows, columns=columns)
-llm_res.to_csv("results/llm.csv")
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+llm_res.to_csv(RESULT_DIR / "llm.csv")
 llm_res
 
 # %%

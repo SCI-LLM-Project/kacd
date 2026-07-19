@@ -6,7 +6,7 @@ from tqdm import tqdm
 import util.helpers as helpers
 from prompts.query_prompts.base_prompts import *
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
-from config import PROJECT_ROOT, def_map
+from config import PROJECT_ROOT, def_map, RESULT_DIR
 # corpus chunking, embedding, and the FAISS index all live in the shared
 # retriever module (built once at import time)
 from context_construction.retriever_rag import retrieve_rag_context
@@ -81,7 +81,8 @@ rows = [
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Plausibility Report", "Association Report", "Temporality Report", "Label"
 rag_res = pd.DataFrame(rows, columns=columns)
-rag_res.to_csv("results/rag.csv")
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+rag_res.to_csv(RESULT_DIR / "rag.csv")
 rag_res
 
 # %%

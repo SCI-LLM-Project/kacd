@@ -5,6 +5,7 @@ import pandas as pd
 from tqdm.contrib.concurrent import thread_map
 
 import config
+from config import RESULT_DIR, PROTO_DIR
 import util.helpers as helpers
 from llm.factory import get_client
 from prompts.query_prompts.prompts_directions import *
@@ -13,8 +14,8 @@ from context_construction.retriever_rag import retrieve_rag_context
 from models.AnswerSchema import DirectionAnswer as Answer
 
 # %%
-predictions = pd.read_csv("results/results_undirected_combined.csv", index_col=0)
-proto = pd.read_csv("results/proto.csv")
+predictions = pd.read_csv(RESULT_DIR / "results_undirected_combined.csv", index_col=0)
+proto = pd.read_csv(PROTO_DIR / "proto.csv")
 proto["Proto"] = True
 predictions = predictions.merge(proto, how = 'left', on = ['Var1', 'Var2'])
 predictions["Proto"] = predictions["Proto"].fillna(False)
@@ -217,7 +218,7 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
 # Resolve bidirectional edges for all contexts and metrics
 
 # Create output directory if it doesn't exist
-output_dir = "results/directional_resolved_with_proto_and_causal_lit"
+output_dir = RESULT_DIR / "directional_resolved_with_proto_and_causal_lit"
 os.makedirs(output_dir, exist_ok=True)
 
 # %%

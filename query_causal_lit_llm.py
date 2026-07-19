@@ -7,7 +7,7 @@ import pandas as pd
 from prompts.query_prompts.causal_literature_prompts import *
 from prompts.query_prompts.metric_prompts import causal_lit_prompt
 import util.helpers as helpers
-from config import PROJECT_ROOT, def_map
+from config import PROJECT_ROOT, def_map, RESULT_DIR
 from models.AnswerSchema import CausalLitAnswer as Answer
 from llm.factory import get_client
 
@@ -62,5 +62,6 @@ rows = [
 # %%
 columns = "Var1", "Var2", "Causal Literature",  "Causal Literature Reasoning", "Label"
 llm_res = pd.DataFrame(rows, columns=columns)
-llm_res.to_csv("results/llm_full_causal_literature.csv")
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+llm_res.to_csv(RESULT_DIR / "llm_full_causal_literature.csv")
 llm_res

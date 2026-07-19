@@ -1,9 +1,24 @@
 import json
+from pathlib import Path
 
-PROJECT_ROOT = "~/kacd_submission"
+# anchored to this file's own location rather than a hardcoded path, so every
+# path below resolves the same regardless of the working directory a script or
+# notebook is launched from
+PROJECT_ROOT = Path(__file__).resolve().parent
+
+# base of the results tree - write through RESULT_DIR below, not this
+RESULTS_ROOT = PROJECT_ROOT / "results"
+# name of the execution run. Everything the pipeline generates lands in
+# results/<RUN_NAME>/, so changing this before a run (different model, prompt
+# edits, a rebuilt KG) keeps runs side by side instead of overwriting.
+RUN_NAME = "mistral"
+RESULT_DIR = RESULTS_ROOT / RUN_NAME
+# tracked pipeline inputs (proto edges are external and never regenerated here)
+DATA_DIR = PROJECT_ROOT / "data"
+PROTO_DIR = DATA_DIR / "proto"
 
 # variables of interest - shared definitions used across query prompts
-with open("variable_definitions/default_definitions.json", "r") as file:
+with open(PROJECT_ROOT / "variable_definitions/default_definitions.json", "r") as file:
     def_map = json.load(file)
 
 NEO4J_URI = "bolt://localhost:7688"

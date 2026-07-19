@@ -5,6 +5,7 @@ import pandas as pd
 from tqdm.contrib.concurrent import thread_map
 
 import config
+from config import RESULT_DIR
 import util.helpers as helpers
 from llm.factory import get_client
 from prompts.query_prompts.prompts_directions import *
@@ -13,7 +14,7 @@ from context_construction.retriever_rag import retrieve_rag_context
 from models.AnswerSchema import DirectionAnswer as Answer
 
 # %%
-predictions = pd.read_csv("results/results_undirected_combined.csv", index_col=0)
+predictions = pd.read_csv(RESULT_DIR / "results_undirected_combined.csv", index_col=0)
 
 # %%
 kg_llm_df = predictions[predictions['context'] == 'kg+llm_full.csv']
@@ -253,7 +254,7 @@ print("\nAll resolutions complete!")
 # Save all resolved dataframes to CSV files
 
 # Create output directory if it doesn't exist
-output_dir = "results/directional_resolved_without_proto"
+output_dir = RESULT_DIR / "directional_resolved_without_proto"
 os.makedirs(output_dir, exist_ok=True)
 
 # Save KG+LLM context

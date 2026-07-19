@@ -9,7 +9,7 @@ from tqdm import tqdm
 from prompts.query_prompts.base_prompts import *
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
 import util.helpers as helpers
-from config import PROJECT_ROOT, def_map
+from config import PROJECT_ROOT, def_map, RESULT_DIR
 from models.AnswerSchema import BooleanAnswer as Answer
 from llm.factory import get_client
 # neo4j connection, vector index, embeddings, and the local-search context
@@ -90,7 +90,8 @@ rows = [
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Plausibility Report", "Association Report", "Temporality Report", "Label"
 local_res = pd.DataFrame(rows, columns=columns)
-local_res.to_csv("results/kgrag.csv")
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+local_res.to_csv(RESULT_DIR / "kgrag.csv")
 local_res
 
 # %%

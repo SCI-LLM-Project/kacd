@@ -4,9 +4,9 @@ mmd/
 tmp/
 .env
 
-# Ignore contents of results directory
+# Ignore contents of results directory (everything under it is generated;
+# tracked inputs like the proto edges live in data/)
 results/*
-!results/proto.csv
 
 # But keep this specific file
 !results/consolidate_results.ipynb
