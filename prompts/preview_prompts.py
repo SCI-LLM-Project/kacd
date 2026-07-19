@@ -3,7 +3,7 @@ Renders every prompt template (query-side and construction-side) with a fixed se
 of example inputs so you can eyeball the actual text an LLM would see, without
 running the real pipeline. The query-side previews consolidate what used to be
 separate, copy-pasted "dump some prompts" tails on query_kg.py, query_causal_lit_kg.py,
-and determine_directions.py; the construction-side preview is new (no equivalent
+and query_directions_without_proto.py; the construction-side preview is new (no equivalent
 existed anywhere before).
 
 Run from the repo root as a module (not as a plain script - it's nested inside
@@ -101,7 +101,7 @@ def preview_causal_literature_prompts():
 
 
 def preview_direction_prompts():
-    """Was determine_directions.py's tail: prints (doesn't save) the direction-
+    """Was query_directions_without_proto.py's tail: prints (doesn't save) the direction-
     resolution prompts for the KG/RAG and LLM-only contexts."""
     test_var1, test_var2 = "Sex", "Depression"
     test_report = """

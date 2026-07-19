@@ -13,7 +13,7 @@ This repository contains code for creating a Knowledge Graph using structured ou
 - Make sure neo4j is running in docker
 - python query_kg.py && python query_llm.py && python query_rag.py && python query_causal_lit_kg.py && python query_causal_lit_llm.py && python query_causal_lit_rag.py (order doesn't matter)
 - in results, run the consolidate notebook to create results_dec_combined.csv 
-- run determine_directions.py
+- run query_directions_without_proto.py
 
 # how to dump a database
 
