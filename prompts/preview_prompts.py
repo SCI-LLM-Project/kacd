@@ -2,7 +2,7 @@
 Renders every prompt template (query-side and construction-side) with a fixed set
 of example inputs so you can eyeball the actual text an LLM would see, without
 running the real pipeline. The query-side previews consolidate what used to be
-separate, copy-pasted "dump some prompts" tails on query_kg.py, causal_lit_query.py,
+separate, copy-pasted "dump some prompts" tails on query_kg.py, query_causal_lit_kg.py,
 and determine_directions.py; the construction-side preview is new (no equivalent
 existed anywhere before).
 
@@ -88,7 +88,7 @@ def preview_metric_and_base_prompts():
 
 
 def preview_causal_literature_prompts():
-    """Was causal_lit_query.py's tail: kg/rag/llm prompts for the causal-literature question."""
+    """Was query_causal_lit_kg.py's tail: kg/rag/llm prompts for the causal-literature question."""
     var1, var2 = "Sex", "Anxiety"
     clquery = causal_lit_prompt(var1, var2)
 

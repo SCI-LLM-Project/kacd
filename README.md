@@ -11,7 +11,7 @@ This repository contains code for creating a Knowledge Graph using structured ou
 # How to generate predictions
 - Make sure LLM_API_KEY is set in .env, and config.py's LLM_MODEL points at the Together model/endpoint you want
 - Make sure neo4j is running in docker
-- python query_kg.py && python rag.py && python causal_lit_rag.py && python causal_lit_query.py (order doesn't matter)
+- python query_kg.py && python query_llm.py && python query_rag.py && python query_causal_lit_kg.py && python query_causal_lit_llm.py && python query_causal_lit_rag.py (order doesn't matter)
 - in results, run the consolidate notebook to create results_dec_combined.csv 
 - run determine_directions.py
 
