@@ -67,8 +67,10 @@ def summarize_leaves(leaves, context_window_limit):
     summaries = summarize_context_windows_concurrent([context for _, context, _ in built])
 
     leaves_store = []
-    leaves_map = {}
+    leaves_map = {} # id -> (summary, summary token count, context count)
     for (leaf, context, count), summary in zip(built, summaries):
+        if summary is None:
+            print(f"WARNING: summarization failed for leaf community {leaf['communityId']!r}, Report will be None")
         summary_token_count = helpers.token_count(stringify_summary(summary))
         leaves_map[leaf["communityId"]] = (summary, summary_token_count, count)
         leaf["Report"] = summary
@@ -171,6 +173,8 @@ def summarize_nonleaves(nonleaves, context_window_limit):
     print("Summarizing Nonleaves")
     summaries = summarize_context_windows_concurrent(contexts)
     for community, summary in zip(nonleaves, summaries):
+        if summary is None:
+            print(f"WARNING: summarization failed for nonleaf community {community['communityId']!r}, Report will be None")
         community["Report"] = summary
 
     print("Finished Summarizing Non Leaves")
@@ -200,11 +204,11 @@ def normalize_summarized_community(community):
 def construct_query_context(
     relationships: list[str],
     text_chunks: list[str],
-    reports: list[list[str]],
+    reports: list[str],
     max_context_window = 8000
-    # Total context window is 8000 tokens.
-    # Entities & Relationships implicitly get the rest: 8000 - 4000 - 2000 = 2000 tokens.
-    # This should be ample for 10 entities and 10 relationships.
+    # Chunks get 50% of max_context_window, reports get 40%; relationships get
+    # whatever's left of the two above (~10%, though in practice relationships
+    # rarely fill even that much - see the comment below).
 ) -> str:
     """
     The function assumes that the input lists (entities, relationships, text_chunks, reports)
@@ -214,7 +218,7 @@ def construct_query_context(
     Args:
         relationships: A list of relationship strings.
         text_chunks: A list of text chunk strings.
-        reports: A list of lists of report strings (each inner list is a single report's lines).
+        reports: A list of report strings.
 
     Returns:
         A string formatted as a prompt for the LLM.
@@ -279,19 +283,6 @@ def format_triplet(t):
 
 def stringify_summary(summary):
     return str(repr(summary)) + "\n"
-
-def get_parent_community(source_id):
-    result = graph.query(
-        f"""
-            MATCH (n)-[:IN_COMMUNITY]->(p)
-            WHERE n.id = "{source_id}"
-            return p.id as id
-        """
-    )
-    if not result:
-        # Entity has no parent community (singleton or unassigned)
-        return None
-    return result[0]["id"]
 
 # builds the context string for a leaf community, without calling the LLM.
 # assumes sorted triplets
