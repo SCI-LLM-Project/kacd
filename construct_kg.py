@@ -77,7 +77,7 @@ llm_transformer = LLMGraphTransformer(
 # dispatches every chunk's extraction call concurrently via the backend's .map()
 # instead of looping one chunk at a time - a big win against a hosted API, a no-op
 # against the local vLLM server (see VLLMClient.map)
-docs = [Document(page_content=chunk) for chunk in chunks[:100]]
+docs = [Document(page_content=chunk) for chunk in chunks]
 graph_documents = llm_transformer.convert_to_graph_documents_concurrent(docs)
 
 # %%
