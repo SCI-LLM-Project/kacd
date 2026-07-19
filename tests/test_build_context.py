@@ -24,6 +24,7 @@ from unittest.mock import MagicMock
 
 import context_construction.build_context as build_context
 import util.helpers as helpers
+from models.ReportSchema import Report, Finding
 
 
 def _triplet(start_id, end_id="e2", rel_type="ASSOCIATED_WITH"):
@@ -44,6 +45,20 @@ def _community(community_id, triplets):
 
 def _leaf_entry(summary="summary", summary_token_count=5, raw_community_token_count=100):
     return (summary, summary_token_count, raw_community_token_count)
+
+
+def _real_report(i=0):
+    """A successful summarization result, built from the real schema."""
+    return Report(
+        title=f"Community {i}",
+        summary="A real summary of this community.",
+        impact_severity_rating=7.5,
+        rating_explanation="Rated for its relevance to chronic lower back pain.",
+        detailed_findings=[
+            Finding(summary=f"Finding {n}", explanation=f"Explanation of finding {n}.")
+            for n in range(5)
+        ],
+    )
 
 
 @pytest.fixture
@@ -225,6 +240,93 @@ class TestNormalizeNonleaves:
         build_context.normalize_nonleaves([c1, c2], leaves)
 
         fresh_graph_mock.query.assert_called_once()
+
+
+class TestPlaceholderReportOnFailedSummarization:
+    """A failed summarization call (APIClient.map yields None) must not reach the
+    rest of the pipeline as None - it is swapped for a tiny, zero-impact Report so
+    token counting, normalize_summarized_community and the neo4j write all keep
+    working on a real Report."""
+
+    @pytest.fixture
+    def failing_generator(self, monkeypatch):
+        """Replaces build_context.generator with one whose .map fails the item at
+        index `fail_index` (set per test) and succeeds on the rest."""
+        class Gen:
+            fail_index = None
+
+            def map(self, messages_list):
+                return [
+                    None if i == self.fail_index else _real_report(i)
+                    for i in range(len(messages_list))
+                ]
+
+        gen = Gen()
+        monkeypatch.setattr(build_context, "generator", gen)
+        return gen
+
+    def test_placeholder_validates_and_is_small_and_zero_impact(self):
+        report = build_context.placeholder_report()
+
+        assert build_context.is_placeholder_report(report)
+        assert report.impact_severity_rating == 0.0
+        # schema requires 5-10 findings; placeholder must satisfy it
+        assert 5 <= len(report.detailed_findings) <= 10
+        # cheap enough that retrieving one barely dents the report budget
+        assert helpers.token_count(build_context.stringify_summary(report)) < 200
+
+    def test_real_report_is_not_flagged_as_placeholder(self):
+        assert not build_context.is_placeholder_report(_real_report())
+        assert not build_context.is_placeholder_report(None)
+
+    def test_failed_leaf_gets_placeholder_report_and_warns(self, failing_generator, capsys):
+        failing_generator.fail_index = 1
+        leaves = [_community("leaf-0", [_triplet("e1")]), _community("leaf-1", [_triplet("e2")])]
+        for leaf in leaves:
+            leaf["level"] = 0
+
+        leaves_store, leaves_map = build_context.summarize_leaves(leaves, 8000)
+
+        captured = capsys.readouterr()
+        assert "1/2 community summarizations failed" in captured.out
+        assert "leaf-1" in captured.out
+
+        assert build_context.is_placeholder_report(leaves_store[1]["Report"])
+        assert not build_context.is_placeholder_report(leaves_store[0]["Report"])
+
+    def test_failed_leaf_is_excluded_from_leaves_map(self, failing_generator):
+        # leaves_map drives nonleaf compression - a placeholder there would swap a
+        # child's real triplets out for nothing, so the failed leaf must be absent
+        failing_generator.fail_index = 1
+        leaves = [_community("leaf-0", [_triplet("e1")]), _community("leaf-1", [_triplet("e2")])]
+
+        _, leaves_map = build_context.summarize_leaves(leaves, 8000)
+
+        assert "leaf-0" in leaves_map
+        assert "leaf-1" not in leaves_map
+
+    def test_failed_nonleaf_gets_placeholder_report(self, failing_generator, capsys):
+        failing_generator.fail_index = 0
+        nonleaves = [_community("nonleaf-0", [])]
+        nonleaves[0]["children"] = []
+        nonleaves[0]["community_token_count"] = 0
+
+        out = build_context.summarize_nonleaves(nonleaves, 8000)
+
+        assert build_context.is_placeholder_report(out[0]["Report"])
+        assert "nonleaf-0" in capsys.readouterr().out
+
+    def test_normalize_summarized_community_survives_a_placeholder(self, failing_generator):
+        # the crash this replaces: report.title on a None Report
+        failing_generator.fail_index = 0
+        leaves = [_community("leaf-0", [_triplet("e1")])]
+
+        leaves_store, _ = build_context.summarize_leaves(leaves, 8000)
+        row = build_context.normalize_summarized_community(leaves_store[0])
+
+        assert row["community"] == "leaf-0"
+        assert row["title"] == build_context.FAILED_SUMMARY_TITLE
+        assert row["impact_severity_rating"] == 0.0
 
 
 class TestBuildNonleafContext:

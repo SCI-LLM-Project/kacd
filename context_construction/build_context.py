@@ -41,6 +41,34 @@ if USE_MOCK_GENERATOR:
 else:
     generator = get_client(schema=Report)
 
+# Title used to mark a community whose summarization call failed. Doubles as the
+# detection mechanism (is_placeholder_report) - the Report schema has nowhere else
+# to put a flag, and this string is what lands in neo4j, so a failed community is
+# identifiable in the graph too.
+FAILED_SUMMARY_TITLE = "Summarization Failed"
+
+def placeholder_report():
+    """Stand-in Report for a community whose summarization call failed.
+
+    Substituted instead of None so the rest of the pipeline (token counting,
+    normalize_summarized_community, the neo4j write) keeps working on a real
+    Report. Deliberately tiny and rated 0 so that if it is retrieved it costs
+    almost no context budget and sorts last on impact rating. The schema
+    requires 5-10 findings, hence the five stub entries."""
+    return Report(
+        title=FAILED_SUMMARY_TITLE,
+        summary="Summarization failed for this community; no content available.",
+        impact_severity_rating=0.0,
+        rating_explanation="No summary was produced.",
+        detailed_findings=[
+            Finding(summary="N/A", explanation="No summary was produced.")
+            for _ in range(5)
+        ],
+    )
+
+def is_placeholder_report(report):
+    return report is not None and report.title == FAILED_SUMMARY_TITLE
+
 # splits the community info into leaf communitites and nonleaf communities
 def split_and_sort(community_info):
     leaves = []
@@ -69,12 +97,17 @@ def summarize_leaves(leaves, context_window_limit):
     leaves_store = []
     leaves_map = {} # id -> (summary, summary token count, context count)
     for (leaf, context, count), summary in zip(built, summaries):
-        if summary is None:
-            print(f"WARNING: summarization failed for leaf community {leaf['communityId']!r}, Report will be None")
-        summary_token_count = helpers.token_count(stringify_summary(summary))
-        leaves_map[leaf["communityId"]] = (summary, summary_token_count, count)
         leaf["Report"] = summary
         leaves_store.append(leaf)
+        if is_placeholder_report(summary):
+            # deliberately left out of leaves_map: that map drives nonleaf
+            # compression, which swaps a child's raw triplets out for its summary.
+            # Substituting a placeholder there would delete real triplets and
+            # replace them with nothing, so the parent keeps the raw triplets instead.
+            print(f"WARNING: summarization failed for leaf community {leaf['communityId']!r}, using placeholder report")
+            continue
+        summary_token_count = helpers.token_count(stringify_summary(summary))
+        leaves_map[leaf["communityId"]] = (summary, summary_token_count, count)
 
     # leaves store will be passed to the LLM, leaves_map will be used for non leaves
     return leaves_store, leaves_map
@@ -184,8 +217,8 @@ def summarize_nonleaves(nonleaves, context_window_limit):
     print("Summarizing Nonleaves")
     summaries = summarize_context_windows_concurrent(contexts)
     for community, summary in zip(nonleaves, summaries):
-        if summary is None:
-            print(f"WARNING: summarization failed for nonleaf community {community['communityId']!r}, Report will be None")
+        if is_placeholder_report(summary):
+            print(f"WARNING: summarization failed for nonleaf community {community['communityId']!r}, using placeholder report")
         community["Report"] = summary
 
     print("Finished Summarizing Non Leaves")
@@ -284,8 +317,17 @@ def construct_query_context(
 def summarize_context_windows_concurrent(contexts):
     messages_list = [summarize_community(context) for context in contexts]
     if hasattr(generator, "map"):
-        return generator.map(messages_list)
-    return [generator(messages) for messages in messages_list]
+        summaries = generator.map(messages_list)
+    else:
+        summaries = [generator(messages) for messages in messages_list]
+
+    # .map returns None for any item whose call failed - swap in a placeholder so
+    # downstream code always has a real Report to work with
+    failed = sum(summary is None for summary in summaries)
+    if failed:
+        print(f"WARNING: {failed}/{len(summaries)} community summarizations failed; "
+              "substituting placeholder reports (impact rating 0, excluded from nonleaf compression)")
+    return [summary if summary is not None else placeholder_report() for summary in summaries]
 
 # include in prompt this triplet
 def format_triplet(t):
