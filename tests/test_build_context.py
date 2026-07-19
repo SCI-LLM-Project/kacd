@@ -81,7 +81,8 @@ class TestNormalizeNonleaves:
 
         fresh_graph_mock.query.assert_called_once()
         cypher = fresh_graph_mock.query.call_args[0][0]
-        assert "e1" in cypher
+        assert "$ids" in cypher
+        assert "e1" in fresh_graph_mock.query.call_args.kwargs["params"]["ids"]
 
         out = result[0]
         assert triplet["parent_id"] == "leaf-1"
@@ -201,6 +202,19 @@ class TestNormalizeNonleaves:
         assert result[1] is c2
         assert "children" in c1 and "community_token_count" in c1
         assert "children" in c2 and "community_token_count" in c2
+
+    def test_ids_go_through_params_never_interpolated_into_the_query(self, fresh_graph_mock):
+        # entity ids come from LLM extraction - an id containing quotes must
+        # ride in query params, not get f-string-embedded into the cypher text
+        fresh_graph_mock.query.return_value = []
+        hostile_id = 'entity "with" quotes'
+        community = _community("c1", [_triplet(hostile_id)])
+
+        build_context.normalize_nonleaves([community], {})
+
+        cypher = fresh_graph_mock.query.call_args[0][0]
+        assert hostile_id not in cypher
+        assert hostile_id in fresh_graph_mock.query.call_args.kwargs["params"]["ids"]
 
     def test_batches_all_communities_start_ids_into_a_single_query(self, fresh_graph_mock):
         fresh_graph_mock.query.return_value = [{"node_id": "shared", "parent_id": "leaf-1"}]

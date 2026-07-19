@@ -87,15 +87,16 @@ def normalize_nonleaves(nonleaves, leaves):
         for triplet in community["triplets"]:
             all_start_ids.add(triplet["start_id"])
 
-    # Single batch query to get all parent communities
+    # Single batch query to get all parent communities. ids go through query
+    # params - they come from LLM extraction, so f-string interpolation would
+    # break (or inject) on any id containing a quote
     parent_map = {}
     if all_start_ids:
-        ids_list = "[" + ", ".join(f'"{id}"' for id in all_start_ids) + "]"
-        result = graph.query(f"""
+        result = graph.query("""
             MATCH (n)-[:IN_COMMUNITY]->(p)
-            WHERE n.id IN {ids_list}
+            WHERE n.id IN $ids
             RETURN n.id as node_id, p.id as parent_id
-        """)
+        """, params={"ids": list(all_start_ids)})
         if not result:
             print(f"WARNING: normalize_nonleaves found no parent-community mappings for {len(all_start_ids)} start_ids")
         parent_map = {row["node_id"]: row["parent_id"] for row in result}
