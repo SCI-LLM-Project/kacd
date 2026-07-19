@@ -38,15 +38,7 @@ rag_temporality = rag_df.drop(columns=temporality_drop)
 # ## Resolving Bidirectional Relationships
 
 # %%
-from pydantic import BaseModel, Field
-from typing import List, Literal
-
-class Reasoning_Step(BaseModel):
-    reasoning_step: str = Field(..., description="An intermediate reasoning step for breaking down the given context and query")
-
-class Answer(BaseModel):
-    reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
-    conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
+from models.AnswerSchema import DirectionAnswer as Answer
 
 generator = get_client(schema=Answer)
 

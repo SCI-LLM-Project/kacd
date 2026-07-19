@@ -52,15 +52,7 @@ graph = Neo4jGraph(
 # ## Setting up LLM
 
 # %%
-from pydantic import BaseModel, Field
-from typing import List, Literal
-
-class Reasoning_Step(BaseModel):
-    reasoning_step: str = Field(..., description="An intermediate reasoning step for breaking down the given context and query")
-
-class Answer(BaseModel):
-    reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
-    conclusion: Literal['A', 'B', 'C']
+from models.AnswerSchema import CausalLitAnswer as Answer
 
 # %%
 from llm.factory import get_client
