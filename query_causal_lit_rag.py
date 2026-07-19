@@ -90,7 +90,7 @@ generator = get_client(schema=Answer)
 # %%
 from prompts.query_prompts.causal_literature_prompts import query_rag_causal_lit_prompt
 
-def local_retriever(query, var1, var2, summary, debug=False):
+def rag_retriever(query, var1, var2, summary, debug=False):
     if debug:
         print(query_rag_causal_lit_prompt(query, var1, var2, summary, def_map))
     response = generator(query_rag_causal_lit_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
@@ -101,7 +101,7 @@ def local_retriever(query, var1, var2, summary, debug=False):
 # %%
 from prompts.query_prompts.metric_prompts import causal_lit_prompt
 
-def query_local_causality(row):
+def query_rag_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
     # bandaid for now
     var1 = "Sleep disturbance" if var1 == "Sleep" else var1
@@ -109,7 +109,7 @@ def query_local_causality(row):
         
     clquery = causal_lit_prompt(var1, var2)
     clreport = get_k_docs(clquery)
-    causal_lit, clreasoning = local_retriever(clquery, var1, var2, clreport)
+    causal_lit, clreasoning = rag_retriever(clquery, var1, var2, clreport)
     return [var1, var2, causal_lit, clreasoning, clreport, label]
 
 # %%
@@ -123,12 +123,12 @@ tqdm.pandas()
 # # Setting Up the Experiment
 
 # %%
-res = full.progress_apply(query_local_causality, axis=1)
+res = full.progress_apply(query_rag_causality, axis=1)
 
 # %%
 columns = "Var1", "Var2", "Causal Literature", "Causal Literature Reasoning", "Causal Literature Report", "Label"
-local_res = pd.DataFrame(res.to_list(), columns=columns)
-local_res.to_csv("results/llm+rag_full_causal_literature.csv")
-local_res
+rag_res = pd.DataFrame(res.to_list(), columns=columns)
+rag_res.to_csv("results/llm+rag_full_causal_literature.csv")
+rag_res
 
 

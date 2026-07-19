@@ -89,7 +89,7 @@ from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-def local_retriever(query, var1, var2, summary, debug=False):
+def rag_retriever(query, var1, var2, summary, debug=False):
     if debug:
         print(query_rag_prompt(query, var1, var2, summary, def_map))
     response = generator(query_rag_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
@@ -100,7 +100,7 @@ def local_retriever(query, var1, var2, summary, debug=False):
 # %%
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
 
-def query_local_causality(row):
+def query_rag_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
     # bandaid for now
     var1 = "Sleep disturbance" if var1 == "Sleep" else var1
@@ -112,9 +112,9 @@ def query_local_causality(row):
     areport = get_k_docs(aquery)
     tquery = temporality_prompt(var1, var2)
     treport = get_k_docs(tquery)
-    plausibility, preasoning = local_retriever(pquery, var1, var2, preport)
-    association, areasoning = local_retriever(aquery, var1, var2, areport)
-    temporality, treasoning = local_retriever(tquery, var1, var2, treport)
+    plausibility, preasoning = rag_retriever(pquery, var1, var2, preport)
+    association, areasoning = rag_retriever(aquery, var1, var2, areport)
+    temporality, treasoning = rag_retriever(tquery, var1, var2, treport)
     return [var1, var2, plausibility, preasoning, association, areasoning, temporality, treasoning, preport, areport, treport, label]
 
 # %%
@@ -129,20 +129,20 @@ tqdm.pandas()
 # # Setting Up the Experiment
 
 # %%
-res = full.progress_apply(query_local_causality, axis=1)
+res = full.progress_apply(query_rag_causality, axis=1)
 
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Plausibility Report", "Association Report", "Temporality Report", "Label"
-local_res = pd.DataFrame(res.to_list(), columns=columns)
-local_res.to_csv("results/rag.csv")
-local_res
+rag_res = pd.DataFrame(res.to_list(), columns=columns)
+rag_res.to_csv("results/rag.csv")
+rag_res
 
 # %%
 from sklearn.metrics import f1_score
 
-f1_score(local_res["Label"], local_res["Plausibility"])
+f1_score(rag_res["Label"], rag_res["Plausibility"])
 
 # %%
-f1_score(local_res["Plausibility"], local_res["Label"])
+f1_score(rag_res["Plausibility"], rag_res["Label"])
 
 
