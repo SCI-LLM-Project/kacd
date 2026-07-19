@@ -26,7 +26,7 @@ topEntities = 20
 # endpoint name). API key is not stored here - see .env / LLM_API_KEY.
 LLM_BACKEND = "together"
 LLM_MODEL = "damonlin93410-8d4a/mistral-7b-instruct"
-LLM_MAX_WORKERS = 64
+LLM_MAX_WORKERS = 32
 
 # Tokenizer used for approximate token-count budgeting (context-window packing in
 # build_context.py - query_context_window, community summarization, etc). Kept
