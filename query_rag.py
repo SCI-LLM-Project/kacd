@@ -32,15 +32,6 @@ from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-def rag_retriever(query, var1, var2, summary, debug=False):
-    if debug:
-        print(query_rag_prompt(query, var1, var2, summary, def_map))
-    response = generator(query_rag_prompt(query, var1, var2, summary, def_map))
-
-    return response.conclusion, helpers.reasoning_to_string(response)
-
-
-# %%
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
 
 def query_rag_causality(row):
@@ -51,14 +42,21 @@ def query_rag_causality(row):
 
     pquery = plausibility_prompt(var1, var2)
     preport = retrieve_rag_context(pquery)
+    presponse = generator(query_rag_prompt(pquery, var1, var2, preport, def_map))
+
     aquery = association_prompt(var1, var2)
     areport = retrieve_rag_context(aquery)
+    aresponse = generator(query_rag_prompt(aquery, var1, var2, areport, def_map))
+
     tquery = temporality_prompt(var1, var2)
     treport = retrieve_rag_context(tquery)
-    plausibility, preasoning = rag_retriever(pquery, var1, var2, preport)
-    association, areasoning = rag_retriever(aquery, var1, var2, areport)
-    temporality, treasoning = rag_retriever(tquery, var1, var2, treport)
-    return [var1, var2, plausibility, preasoning, association, areasoning, temporality, treasoning, preport, areport, treport, label]
+    tresponse = generator(query_rag_prompt(tquery, var1, var2, treport, def_map))
+
+    return [var1, var2,
+            presponse.conclusion, helpers.reasoning_to_string(presponse),
+            aresponse.conclusion, helpers.reasoning_to_string(aresponse),
+            tresponse.conclusion, helpers.reasoning_to_string(tresponse),
+            preport, areport, treport, label]
 
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])

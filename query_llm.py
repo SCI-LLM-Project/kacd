@@ -33,26 +33,21 @@ generator = get_client(schema=Answer)
 from config import def_map
 
 # %%
-def llm_retriever(query, var1, var2, debug=False):
-    if debug:
-        print(query_llm_prompt(query, var1, var2, def_map))
-    response = generator(query_llm_prompt(query, var1, var2, def_map))
-    return response.conclusion, helpers.reasoning_to_string(response)
-
-# %%
 def query_llm_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
     # bandaid for now
     var1 = "Sleep disturbance" if var1 == "Sleep" else var1
     var2 = "Sleep disturbance" if var2 == "Sleep" else var2
 
-    pquery = plausibility_prompt(var1, var2)
-    aquery = association_prompt(var1, var2)
-    tquery = temporality_prompt(var1, var2)
-    plausibility, preasoning = llm_retriever(pquery, var1, var2)
-    association, areasoning = llm_retriever(aquery, var1, var2)
-    temporality, treasoning = llm_retriever(tquery, var1, var2)
-    return [var1, var2, plausibility, preasoning, association, areasoning, temporality, treasoning, label]
+    presponse = generator(query_llm_prompt(plausibility_prompt(var1, var2), var1, var2, def_map))
+    aresponse = generator(query_llm_prompt(association_prompt(var1, var2), var1, var2, def_map))
+    tresponse = generator(query_llm_prompt(temporality_prompt(var1, var2), var1, var2, def_map))
+
+    return [var1, var2,
+            presponse.conclusion, helpers.reasoning_to_string(presponse),
+            aresponse.conclusion, helpers.reasoning_to_string(aresponse),
+            tresponse.conclusion, helpers.reasoning_to_string(tresponse),
+            label]
 
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])

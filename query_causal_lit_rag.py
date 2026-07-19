@@ -31,16 +31,6 @@ generator = get_client(schema=Answer)
 
 # %%
 from prompts.query_prompts.causal_literature_prompts import query_rag_causal_lit_prompt
-
-def rag_retriever(query, var1, var2, summary, debug=False):
-    if debug:
-        print(query_rag_causal_lit_prompt(query, var1, var2, summary, def_map))
-    response = generator(query_rag_causal_lit_prompt(query, var1, var2, summary, def_map))
-
-    return response.conclusion, helpers.reasoning_to_string_multiple_choice(response)
-
-
-# %%
 from prompts.query_prompts.metric_prompts import causal_lit_prompt
 
 def query_rag_causality(row):
@@ -51,8 +41,8 @@ def query_rag_causality(row):
 
     clquery = causal_lit_prompt(var1, var2)
     clreport = retrieve_rag_context(clquery)
-    causal_lit, clreasoning = rag_retriever(clquery, var1, var2, clreport)
-    return [var1, var2, causal_lit, clreasoning, clreport, label]
+    clresponse = generator(query_rag_causal_lit_prompt(clquery, var1, var2, clreport, def_map))
+    return [var1, var2, clresponse.conclusion, helpers.reasoning_to_string_multiple_choice(clresponse), clreport, label]
 
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])

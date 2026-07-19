@@ -40,15 +40,6 @@ from context_construction.retriever_kgrag import retrieve_kgrag_context
 from config import def_map
 
 # %%
-def local_retriever(query, var1, var2, summary, debug=False):
-    if debug:
-        print(query_kg_causal_lit_prompt(query, var1, var2, summary, def_map))
-        print(helpers.token_count(query_kg_causal_lit_prompt(query, var1, var2, summary, def_map)))
-    response = generator(query_kg_causal_lit_prompt(query, var1, var2, summary, def_map))
-
-    return response.conclusion, helpers.reasoning_to_string_multiple_choice(response)
-
-# %%
 from prompts.query_prompts.metric_prompts import causal_lit_prompt
 
 def query_local_causality(row):
@@ -59,8 +50,8 @@ def query_local_causality(row):
 
     clquery = causal_lit_prompt(var1, var2)
     clreport = retrieve_kgrag_context(clquery)
-    causal_literature, causal_lit_reasoning = local_retriever(clquery, var1, var2, clreport)
-    return [var1, var2, causal_literature, causal_lit_reasoning, clreport, label]
+    clresponse = generator(query_kg_causal_lit_prompt(clquery, var1, var2, clreport, def_map))
+    return [var1, var2, clresponse.conclusion, helpers.reasoning_to_string_multiple_choice(clresponse), clreport, label]
 
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])

@@ -40,15 +40,6 @@ from context_construction.retriever_kgrag import retrieve_kgrag_context
 from config import def_map
 
 # %%
-def local_retriever(query, var1, var2, summary, debug=False):
-    if debug:
-        print(query_kg_prompt(query, var1, var2, summary, def_map))
-    response = generator(query_kg_prompt(query, var1, var2, summary, def_map))
-
-    return response.conclusion, helpers.reasoning_to_string(response)
-
-
-# %%
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
 
 def query_local_causality(row):
@@ -59,17 +50,21 @@ def query_local_causality(row):
 
     pquery = plausibility_prompt(var1, var2)
     preport = retrieve_kgrag_context(pquery)
+    presponse = generator(query_kg_prompt(pquery, var1, var2, preport, def_map))
 
     aquery = association_prompt(var1, var2)
     areport = retrieve_kgrag_context(aquery)
+    aresponse = generator(query_kg_prompt(aquery, var1, var2, areport, def_map))
 
     tquery = temporality_prompt(var1, var2)
     treport = retrieve_kgrag_context(tquery)
+    tresponse = generator(query_kg_prompt(tquery, var1, var2, treport, def_map))
 
-    plausibility, preasoning = local_retriever(pquery, var1, var2, preport)
-    association, areasoning = local_retriever(aquery, var1, var2, areport)
-    temporality, treasoning = local_retriever(tquery, var1, var2, treport)
-    return [var1, var2, plausibility, preasoning, association, areasoning, temporality, treasoning, preport, areport, treport, label]
+    return [var1, var2,
+            presponse.conclusion, helpers.reasoning_to_string(presponse),
+            aresponse.conclusion, helpers.reasoning_to_string(aresponse),
+            tresponse.conclusion, helpers.reasoning_to_string(tresponse),
+            preport, areport, treport, label]
 
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
