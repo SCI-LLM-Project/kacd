@@ -5,6 +5,7 @@ import pandas as pd
 from tqdm.contrib.concurrent import thread_map
 
 import config
+import util.helpers as helpers
 from llm.factory import get_client
 from prompts.query_prompts.prompts_directions import *
 from context_construction.retriever_kgrag import retrieve_kgrag_context
@@ -45,24 +46,6 @@ rag_temporality = rag_df.drop(columns=temporality_drop)
 
 # %%
 generator = get_client(schema=Answer)
-
-# %%
-def answer_to_string(reasoning_steps, conclusion=None):
-    """Convert Answer object or reasoning steps list to readable string."""
-    result = "Reasoning Process:\n"
-    
-    # Handle if it's a list of Reasoning_Step objects
-    if isinstance(reasoning_steps, list):
-        for i, step in enumerate(reasoning_steps, 1):
-            if hasattr(step, 'reasoning_step'):
-                result += f"Step {i}: {step.reasoning_step}\n"
-            else:
-                result += f"Step {i}: {step}\n"
-    
-    if conclusion:
-        result += f"\nConclusion: {conclusion}"
-    
-    return result
 
 # %%
 def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_report_col, report_type, generator, prompt_func):
@@ -166,7 +149,7 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
                 'Var1': var1 if response.conclusion == 'A' else var2,
                 'Var2': var2 if response.conclusion == 'A' else var1,
                 metric_col: True,
-                metric_reasoning_col: answer_to_string(response.reasoning, response.conclusion),
+                metric_reasoning_col: helpers.reasoning_to_string_multiple_choice(response),
                 'Direction Report': new_report,
                 metric_report_col: prev_report,
                 'Direction_Resolved': True
