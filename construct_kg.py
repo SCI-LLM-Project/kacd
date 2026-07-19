@@ -51,7 +51,7 @@ for file in files:
         # simple markdown parser that removes citations, urls, references, acknowledgements, and basically everything after the conclusion
         content = markdown_parser.process_markdown_paper(str(file))
         # semantic chunk is chunking w.r.t sentences, and has overlap param as well
-        chunks.extend(markdown_parser.semantic_chunk(content) )
+        chunks.extend(markdown_parser.semantic_chunk(content))
 
 # %%
 len(chunks)
@@ -77,7 +77,7 @@ llm_transformer = LLMGraphTransformer(
 # dispatches every chunk's extraction call concurrently via the backend's .map()
 # instead of looping one chunk at a time - a big win against a hosted API, a no-op
 # against the local vLLM server (see VLLMClient.map)
-docs = [Document(page_content=chunk) for chunk in chunks]
+docs = [Document(page_content=chunk) for chunk in chunks[:100]]
 graph_documents = llm_transformer.convert_to_graph_documents_concurrent(docs)
 
 # %%

@@ -1,8 +1,6 @@
 import re
 import os
 
-import config
-
 def read_markdown_file(file_path):
     """
     Basic function to read a markdown file
@@ -53,29 +51,47 @@ def process_markdown_paper(file_path):
 
     return content.strip()
 
-def semantic_chunk(text, model_name=config.TOKENIZER_MODEL, max_chunk_tokens=600, overlap_tokens=100):
+def semantic_chunk(text, tokenizer=None, model_name=None, max_chunk_tokens=600, overlap_tokens=100):
     """
-    Chunk text using LangChain's SentenceTransformersTokenTextSplitter, so chunk
-    sizes are measured with the given model's own tokenizer - by default the
-    same tokenizer (config.TOKENIZER_MODEL) used for context-window budgeting
-    elsewhere in the pipeline, instead of TokenTextSplitter's hardcoded tiktoken
-    encoding.
+    Chunk text on token boundaries using a plain HuggingFace tokenizer, via
+    LangChain's Tokenizer/split_text_on_tokens (the same mechanism
+    TokenTextSplitter/SentenceTransformersTokenTextSplitter use internally,
+    just keyed to a tokenizer instead of a full model). No model weights are
+    ever loaded - SentenceTransformersTokenTextSplitter loads the entire model
+    purely to reach its .tokenizer attribute, which is both wasteful and, for
+    a multi-billion-parameter model, a real GPU/CPU memory risk.
 
     Args:
         text: The text to chunk
-        model_name: HuggingFace model whose tokenizer sizes the chunks (default: config.TOKENIZER_MODEL)
+        tokenizer: A pre-loaded tokenizer to use instead of the default. Takes
+            priority over model_name.
+        model_name: Load a *different* HuggingFace model's tokenizer instead
+            of the shared default. Ignored if tokenizer is given.
         max_chunk_tokens: Maximum size of each chunk in tokens (default: 600)
         overlap_tokens: Number of tokens to overlap between chunks (default: 100)
 
     Returns:
         List of text chunks
     """
-    from langchain_text_splitters import SentenceTransformersTokenTextSplitter
+    from langchain.text_splitter import Tokenizer, split_text_on_tokens
 
-    splitter = SentenceTransformersTokenTextSplitter(
-        model_name=model_name,
-        tokens_per_chunk=max_chunk_tokens,
+    if tokenizer is None:
+        if model_name is None:
+            # same tokenizer used for context-window budgeting everywhere else
+            # in the pipeline - imported lazily so plain `import
+            # util.markdown_parser` doesn't force this load on callers who
+            # only want e.g. remove_end_sections
+            import util.helpers as helpers
+            tokenizer = helpers.tokenizer
+        else:
+            from transformers import AutoTokenizer
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    lc_tokenizer = Tokenizer(
         chunk_overlap=overlap_tokens,
+        tokens_per_chunk=max_chunk_tokens,
+        decode=tokenizer.decode,
+        encode=tokenizer.encode,
     )
-    return splitter.split_text(text)
+    return split_text_on_tokens(text=text, tokenizer=lc_tokenizer)
 

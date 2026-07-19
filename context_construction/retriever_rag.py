@@ -17,7 +17,7 @@ for file in files:
         # simple markdown parser that removes citations, urls, references, acknowledgements, and basically everything after the conclusion
         content = markdown_parser.process_markdown_paper(str(file))
         # semantic chunk is chunking w.r.t sentences, and has overlap param as well
-        chunks.extend(markdown_parser.semantic_chunk(content) )
+        chunks.extend(markdown_parser.semantic_chunk(content))
 
 
 model = SentenceTransformer('pritamdeka/S-PubMedBert-MS-MARCO')
