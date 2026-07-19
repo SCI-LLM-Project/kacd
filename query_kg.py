@@ -43,7 +43,7 @@ from config import def_map
 def local_retriever(query, var1, var2, summary, debug=False):
     if debug:
         print(query_kg_prompt(query, var1, var2, summary, def_map))
-    response = generator(query_kg_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+    response = generator(query_kg_prompt(query, var1, var2, summary, def_map))
 
     return response.conclusion, helpers.reasoning_to_string(response)
 

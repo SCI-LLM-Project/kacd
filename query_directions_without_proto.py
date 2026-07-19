@@ -158,7 +158,7 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
             else:
                 new_report = ''
 
-            response = generator(prompt_func(var1, var2, new_report), sampling_params={"n":1,"temperature":0.0, "top_k":1})
+            response = generator(prompt_func(var1, var2, new_report))
 
             return {
                 'Var1': var1 if response.conclusion == 'A' else var2,

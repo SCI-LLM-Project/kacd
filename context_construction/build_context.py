@@ -15,7 +15,7 @@ graph = Neo4jGraph(NEO4J_URI,NEO4J_USERNAME,NEO4J_PASSWORD,NEO4J_DATABASE, refre
 USE_MOCK_GENERATOR = False
 
 # Mock generator function
-def mock_generator(prompt, sampling_params=None):
+def mock_generator(prompt):
     """Returns a fake Report object with random text"""
     num_findings = random.randint(5, 10)
     findings = [
@@ -282,10 +282,9 @@ def construct_query_context(
 # the mock generator, which is just a function with no .map()
 def summarize_context_windows_concurrent(contexts):
     messages_list = [summarize_community(context) for context in contexts]
-    sampling_params = {"n": 1, "temperature": 0, "top_k": 1}
     if hasattr(generator, "map"):
-        return generator.map(messages_list, sampling_params=sampling_params)
-    return [generator(messages, sampling_params=sampling_params) for messages in messages_list]
+        return generator.map(messages_list)
+    return [generator(messages) for messages in messages_list]
 
 # include in prompt this triplet
 def format_triplet(t):

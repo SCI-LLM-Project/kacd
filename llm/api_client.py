@@ -43,13 +43,12 @@ class APIClient:
                 },
             }
 
-    def __call__(self, messages: List[Dict[str, str]], sampling_params: Optional[Dict[str, Any]] = None):
-        sampling_params = sampling_params or {}
+    def __call__(self, messages: List[Dict[str, str]]):
         kwargs = dict(
             model=self.model,
             messages=messages,
-            temperature=sampling_params.get("temperature", 0),
-            max_tokens=sampling_params.get("max_tokens", self.max_tokens),
+            temperature=0,
+            max_tokens=self.max_tokens,
         )
         if self._response_format:
             kwargs["response_format"] = self._response_format
@@ -64,7 +63,7 @@ class APIClient:
             text = response.choices[0].message.content
             return self.schema.model_validate_json(text) if self.schema else text
 
-    def map(self, list_of_messages: List[List[Dict[str, str]]], sampling_params: Optional[Dict[str, Any]] = None):
+    def map(self, list_of_messages: List[List[Dict[str, str]]]):
         """Run __call__ over many independent prompts concurrently, preserving order,
         with a progress bar via tqdm's own ThreadPoolExecutor integration. thread_map
         itself has no per-item exception isolation - a raised exception would blow
@@ -73,7 +72,7 @@ class APIClient:
         def _safe_call(indexed_messages):
             i, messages = indexed_messages
             try:
-                return self(messages, sampling_params=sampling_params)
+                return self(messages)
             except Exception as e:
                 print(f"Error in APIClient.map() item {i}, skipping: {e}")
                 return None

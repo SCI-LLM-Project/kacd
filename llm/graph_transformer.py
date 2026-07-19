@@ -107,7 +107,7 @@ class LLMGraphTransformer:
         an LLM based on the model's schema and constraints.
         """
         text = document.page_content
-        res = self.structured_llm(self.prompt(text, debug=False), sampling_params={"n":1, "temperature":0, "top_k":1})
+        res = self.structured_llm(self.prompt(text, debug=False))
         # langchain backlips to convert the graph into langchain graph documents
         nodes, relationships = _convert_to_graph_document(res)
         return GraphDocument(nodes=nodes, relationships=relationships, source=document)
@@ -132,9 +132,7 @@ class LLMGraphTransformer:
         """Same as convert_to_graph_documents, but dispatches every document's LLM
         call concurrently via the backend's .map() instead of looping one at a time."""
         all_messages = [self.prompt(document.page_content, debug=False) for document in documents]
-        results = self.structured_llm.map(
-            all_messages, sampling_params={"n": 1, "temperature": 0, "top_k": 1}
-        )
+        results = self.structured_llm.map(all_messages)
         graph_documents = []
         for res, document in zip(results, documents):
             if not res:

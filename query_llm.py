@@ -36,7 +36,7 @@ from config import def_map
 def llm_retriever(query, var1, var2, debug=False):
     if debug:
         print(query_llm_prompt(query, var1, var2, def_map))
-    response = generator(query_llm_prompt(query, var1, var2, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
+    response = generator(query_llm_prompt(query, var1, var2, def_map))
     return response.conclusion, helpers.reasoning_to_string(response)
 
 # %%

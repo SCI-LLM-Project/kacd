@@ -104,16 +104,6 @@ class TestAPIClientCall:
         assert kwargs["max_tokens"] == 123
         assert kwargs["response_format"] == client._response_format
 
-    def test_sampling_params_override_defaults(self, fake_together):
-        fake_together.chat.completions.create.return_value = _fake_response('{"name": "x", "inner": {"value": 1}}')
-        client = APIClient(schema=Outer, model="m", max_tokens=999)
-
-        client([{"role": "user", "content": "hi"}], sampling_params={"temperature": 0.7, "max_tokens": 55})
-
-        _, kwargs = fake_together.chat.completions.create.call_args
-        assert kwargs["temperature"] == 0.7
-        assert kwargs["max_tokens"] == 55
-
     def test_retries_once_on_failure_then_succeeds(self, fake_together):
         fake_together.chat.completions.create.side_effect = [
             Exception("transient"),

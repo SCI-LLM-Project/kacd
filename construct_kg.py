@@ -191,7 +191,7 @@ extraction_llm = get_client(schema=Disambiguate)
 
 @retry(tries=1, delay=2)
 def entity_resolution(entities: List[str]) -> Optional[List[str]]:
-    res = extraction_llm(entity_resolution_prompt(sorted(entities)), sampling_params={"n":1, "temperature":0, "top_k":1})
+    res = extraction_llm(entity_resolution_prompt(sorted(entities)))
     return [
         el.entities
         for el in res.merge_entities
