@@ -63,8 +63,8 @@ clresponses = generator.map(clprompts)
 # ('C', no causal relationship) and empty reasoning
 rows = [
     [var1, var2,
-     clresponse.conclusion if clresponse is not None else "C",
-     helpers.reasoning_to_string_multiple_choice(clresponse) if clresponse is not None else "",
+     helpers.conclusion_of(clresponse, default="C"),
+     helpers.reasoning_of(clresponse, to_string=helpers.reasoning_to_string_multiple_choice),
      clreport, label]
     for (var1, var2, label), clresponse, clreport in zip(pairs, clresponses, clreports)
 ]

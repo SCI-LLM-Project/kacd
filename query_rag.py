@@ -68,17 +68,11 @@ tresponses = generator.map(tprompts)
 # Phase 3: assemble rows. a failed call keeps its row, with the negative class
 # (False) and empty reasoning - only the failed metric is affected, the row's
 # other metrics keep their real answers
-def conclusion_of(response):
-    return response.conclusion if response is not None else False
-
-def reasoning_of(response):
-    return helpers.reasoning_to_string(response) if response is not None else ""
-
 rows = [
     [var1, var2,
-     conclusion_of(presponse), reasoning_of(presponse),
-     conclusion_of(aresponse), reasoning_of(aresponse),
-     conclusion_of(tresponse), reasoning_of(tresponse),
+     helpers.conclusion_of(presponse), helpers.reasoning_of(presponse),
+     helpers.conclusion_of(aresponse), helpers.reasoning_of(aresponse),
+     helpers.conclusion_of(tresponse), helpers.reasoning_of(tresponse),
      preport, areport, treport, label]
     for (var1, var2, label), presponse, aresponse, tresponse, preport, areport, treport
     in zip(pairs, presponses, aresponses, tresponses, preports, areports, treports)

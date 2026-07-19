@@ -53,8 +53,8 @@ responses = generator.map(prompts)
 # a failed call keeps its row: 'C' (no causal relationship) with empty reasoning
 rows = [
     [var1, var2,
-     response.conclusion if response is not None else "C",
-     helpers.reasoning_to_string_multiple_choice(response) if response is not None else "",
+     helpers.conclusion_of(response, default="C"),
+     helpers.reasoning_of(response, to_string=helpers.reasoning_to_string_multiple_choice),
      label]
     for (var1, var2, label), response in zip(pairs, responses)
 ]

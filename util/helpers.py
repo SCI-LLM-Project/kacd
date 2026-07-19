@@ -70,6 +70,18 @@ def reasoning_to_string_multiple_choice(reasoning_obj) -> str:
     
     return result
 
+def conclusion_of(response, default=False):
+    """Conclusion of a structured LLM response, or `default` when the call
+    failed (APIClient.map returns None for a failed item). Pass default='C'
+    (no causal relationship) for the multiple-choice causal-literature schema."""
+    return response.conclusion if response is not None else default
+
+def reasoning_of(response, to_string=reasoning_to_string):
+    """Readable reasoning of a structured LLM response, or "" when the call
+    failed. Pass to_string=reasoning_to_string_multiple_choice for
+    multiple-choice schemas."""
+    return to_string(response) if response is not None else ""
+
 def load_query(query_path):
     """Load a Cypher query from a file.
     
