@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # ## Parameters
 
 # %%
-path = "~/kg_aug_causal_disc_exp"
+from config import PROJECT_ROOT
 
 # %% [markdown]
 # ## Setting up LLM
@@ -67,7 +67,7 @@ def query_llm_causality(row):
     return [var1, var2, plausibility, preasoning, association, areasoning, temporality, treasoning, label]
 
 # %%
-full = pd.read_csv(f"{path}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
+full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
 # %% [markdown]
 # # Experiments

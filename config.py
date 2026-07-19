@@ -1,3 +1,5 @@
+PROJECT_ROOT = "~/kacd_submission"
+
 NEO4J_URI = "bolt://localhost:7688"
 NEO4J_USERNAME = "neo4j"
 NEO4J_PASSWORD = "password"

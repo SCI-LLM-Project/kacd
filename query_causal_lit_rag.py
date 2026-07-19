@@ -10,7 +10,7 @@ import json
 # # Important Paremeters
 
 # %%
-path = "~/kg_aug_causal_disc_exp"
+from config import PROJECT_ROOT
 
 # %%
 # variables of interest
@@ -124,7 +124,7 @@ def query_local_causality(row):
     return [var1, var2, causal_lit, clreasoning, clreport, label]
 
 # %%
-full = pd.read_csv(f"{path}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
+full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
 # %%
 from tqdm import tqdm
