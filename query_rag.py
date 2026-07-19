@@ -1,6 +1,4 @@
-from sentence_transformers import SentenceTransformer
-import faiss, glob, os
-import numpy as np
+# %%
 import pandas as pd
 import util.helpers as helpers
 from prompts.query_prompts.base_prompts import *
@@ -16,67 +14,12 @@ from config import PROJECT_ROOT
 from config import def_map
 
 # %% [markdown]
-# # Markdown parsing and chunking
+# # Retriever
 
 # %%
-import util.markdown_parser as markdown_parser
-from pathlib import Path
-from config import DIRECTORY
-
-chunks = []
-files = Path(DIRECTORY).glob('**/*.md')
-for file in files:
-    print(file)
-    if os.path.isfile(file):
-        # just reads markdown file into a string (reference stripping is disabled)
-        content = markdown_parser.process_markdown_paper(str(file))
-        # 600 token chunk with 100 token overlap
-        chunks.extend(markdown_parser.chunk(content))
-
-# %% [markdown]
-# # Creating the Retriever
-
-# %%
-model = SentenceTransformer('pritamdeka/S-PubMedBert-MS-MARCO')
-
-# %%
-embs  = model.encode(chunks, convert_to_numpy=True)
-
-# %%
-norms = np.linalg.norm(embs, axis=1, keepdims=True)        # shape (N, 1)
-embs_normalized = embs / np.clip(norms, a_min=1e-12, a_max=None)
-
-# %%
-dim   = embs_normalized.shape[1]
-index = faiss.IndexFlatL2(dim)
-index.add(embs_normalized)
-
-# %%
-import numpy as np
-from config import query_context_window
-import util.helpers as helpers
-
-# we aren't actually using k here
-def get_k_docs(query: str, k: int = 100):
-    # 1. Embed the query
-    q_emb = model.encode([query], convert_to_numpy=True)  # shape (1, D)
-    
-    # 2. Search the FAISS index
-    #    D: array of squared L2 distances, shape (1, k)
-    #    I: array of indices of nearest neighbors, shape (1, k)
-    D, I = index.search(q_emb, k)
-    
-    # 3. Fetch the top-k documents
-    results = []
-    token_count = 0
-    for dist, idx in zip(D[0], I[0]):
-        if helpers.token_count(chunks[idx] + "\n") + token_count > query_context_window:
-            break
-        token_count += helpers.token_count(chunks[idx] + "\n")
-        results.append(chunks[idx]) # the original text or metadata
-        
-
-    return "\n".join(results)
+# corpus chunking, embedding, and the FAISS index all live in the shared
+# retriever module (built once at import time)
+from context_construction.retriever_rag import retrieve_rag_context
 
 # %% [markdown]
 # # Setting Up RAG iterators
@@ -95,7 +38,7 @@ def rag_retriever(query, var1, var2, summary, debug=False):
     response = generator(query_rag_prompt(query, var1, var2, summary, def_map), sampling_params={"n":1, "temperature":0.0, "top_k":1})
 
     return response.conclusion, helpers.reasoning_to_string(response)
-    
+
 
 # %%
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
@@ -105,13 +48,13 @@ def query_rag_causality(row):
     # bandaid for now
     var1 = "Sleep disturbance" if var1 == "Sleep" else var1
     var2 = "Sleep disturbance" if var2 == "Sleep" else var2
-        
+
     pquery = plausibility_prompt(var1, var2)
-    preport = get_k_docs(pquery)
+    preport = retrieve_rag_context(pquery)
     aquery = association_prompt(var1, var2)
-    areport = get_k_docs(aquery)
+    areport = retrieve_rag_context(aquery)
     tquery = temporality_prompt(var1, var2)
-    treport = get_k_docs(tquery)
+    treport = retrieve_rag_context(tquery)
     plausibility, preasoning = rag_retriever(pquery, var1, var2, preport)
     association, areasoning = rag_retriever(aquery, var1, var2, areport)
     temporality, treasoning = rag_retriever(tquery, var1, var2, treport)
@@ -139,5 +82,3 @@ f1_score(rag_res["Label"], rag_res["Plausibility"])
 
 # %%
 f1_score(rag_res["Plausibility"], rag_res["Label"])
-
-
