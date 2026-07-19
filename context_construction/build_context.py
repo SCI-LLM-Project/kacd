@@ -75,6 +75,8 @@ def summarize_leaves(leaves, context_window_limit):
         leaves_map[leaf["communityId"]] = (summary, summary_token_count, count)
         leaf["Report"] = summary
         leaves_store.append(leaf)
+
+    # leaves store will be passed to the LLM, leaves_map will be used for non leaves
     return leaves_store, leaves_map
 
 # counts token count, tracks all child communities within the parent community inside a heap
@@ -94,6 +96,8 @@ def normalize_nonleaves(nonleaves, leaves):
             WHERE n.id IN {ids_list}
             RETURN n.id as node_id, p.id as parent_id
         """)
+        if not result:
+            print(f"WARNING: normalize_nonleaves found no parent-community mappings for {len(all_start_ids)} start_ids")
         parent_map = {row["node_id"]: row["parent_id"] for row in result}
 
     nonleaves_new = []
@@ -103,6 +107,12 @@ def normalize_nonleaves(nonleaves, leaves):
         children = [] # heap
         community_full_token_count = 0
 
+        # for each triplet, resolve which already-summarized leaf community its
+        # start entity belongs to (if any) and track the running token cost of
+        # this nonleaf community's raw triplets - build_nonleaf_context uses the
+        # total against context_window_limit to decide whether raw triplets fit
+        # as-is, or need to be swapped out for child summaries (biggest first,
+        # via the max-heap built below)
         for triplet in community["triplets"]:
             triplet["parent_id"] = parent_map.get(triplet["start_id"])
             triplet["token_count"] = helpers.token_count(format_triplet(triplet))
