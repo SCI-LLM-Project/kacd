@@ -1,6 +1,5 @@
 # %%
 from neo4j import GraphDatabase, Result
-from tqdm import tqdm
 from typing import Dict, Any
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
@@ -161,9 +160,6 @@ def query_local_causality(row):
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
-# %%
-tqdm.pandas()
-
 # %% [markdown]
 # # Experiments
 
@@ -171,7 +167,7 @@ tqdm.pandas()
 # ## Local Search
 
 # %%
-res = full.progress_apply(query_local_causality, axis=1)
+res = helpers.parallel_apply(full, query_local_causality)
 
 # %%
 columns = "Var1", "Var2", "Causal Literature",  "Causal Literature Reasoning", "Causal Literature Report", "Label"

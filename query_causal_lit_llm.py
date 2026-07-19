@@ -2,7 +2,6 @@
 import warnings
 
 import pandas as pd
-from tqdm import tqdm
 
 # %%
 # user defined imports
@@ -54,9 +53,6 @@ def query_llm_causality(row):
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
-# %%
-tqdm.pandas()
-
 # %% [markdown]
 # # Experiments
 
@@ -64,7 +60,7 @@ tqdm.pandas()
 # ## LLM
 
 # %%
-res = full.progress_apply(query_llm_causality, axis=1)
+res = helpers.parallel_apply(full, query_llm_causality)
 
 # %%
 columns = "Var1", "Var2", "Causal Literature",  "Causal Literature Reasoning", "Label"

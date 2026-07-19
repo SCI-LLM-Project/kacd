@@ -2,7 +2,6 @@
 import warnings
 
 import pandas as pd
-from tqdm import tqdm
 
 # %%
 # user defined imports
@@ -65,8 +64,7 @@ full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnam
 # ## LLM
 
 # %%
-tqdm.pandas(desc="Querying LLM")
-res = full.progress_apply(query_llm_causality, axis=1)
+res = helpers.parallel_apply(full, query_llm_causality)
 
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Label"

@@ -10,7 +10,7 @@ tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER_MODEL)
 def token_count(text):
     return len(tokenizer.encode(text))
 
-def parallel_apply(df, func, n_jobs=8):
+def parallel_apply(df, func, n_jobs=config.LLM_MAX_WORKERS):
     """Thread-based equivalent of df.apply(func, axis=1) - one call per row,
     dispatched concurrently with a live progress bar and order preserved.
     Good fit for I/O-bound row functions (LLM calls, Neo4j retrieval) - threads

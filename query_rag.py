@@ -120,16 +120,11 @@ def query_rag_causality(row):
 # %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
-# %%
-from tqdm import tqdm
-
-tqdm.pandas()
-
 # %% [markdown]
 # # Setting Up the Experiment
 
 # %%
-res = full.progress_apply(query_rag_causality, axis=1)
+res = helpers.parallel_apply(full, query_rag_causality)
 
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Plausibility Report", "Association Report", "Temporality Report", "Label"

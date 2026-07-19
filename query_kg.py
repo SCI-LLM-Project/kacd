@@ -1,6 +1,5 @@
 # %%
 from neo4j import GraphDatabase, Result
-from tqdm import tqdm
 from typing import Dict, Any
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
@@ -177,9 +176,8 @@ full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnam
 # ## Local Search
 
 # %%
-tqdm.pandas(desc="Querying Local Search")
 from prompts.query_prompts.base_prompts import *
-res = full.progress_apply(query_local_causality, axis=1)
+res = helpers.parallel_apply(full, query_local_causality)
 
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Plausibility Report", "Association Report", "Temporality Report", "Label"
