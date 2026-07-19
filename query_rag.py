@@ -41,7 +41,7 @@ def rag_retriever(query, var1, var2, summary, debug=False):
 
 
 # %%
-from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, causal_lit_prompt, association_prompt
+from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
 
 def query_rag_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
