@@ -1,0 +1,33 @@
+Var1,Var2
+Sex,Anxiety
+Sex,Sleep disturbance
+Sex,Alcohol
+Sex,PEG
+Anxiety,Depression
+Anxiety,Sleep disturbance
+Anxiety,Financial_level
+Anxiety,Catastrophizing
+Depression,Obesity
+Depression,Sleep disturbance
+Depression,Catastrophizing
+Depression,Alcohol
+Depression,PEG
+Sleep disturbance,Education
+Sleep disturbance,Financial_level
+Sleep disturbance,Catastrophizing
+Sleep disturbance,PEG
+Education,Smoking
+Financial_level,Education
+Financial_level,Fear_avoidance
+Financial_level,PEG
+Catastrophizing,Fear_avoidance
+Catastrophizing,PEG
+Fear_avoidance,Education
+Fear_avoidance,PEG
+Age,Anxiety
+Age,Depression
+Age,Sleep disturbance
+Age,Smoking
+Age,CCI
+Age,PEG
+Alcohol,Financial_level

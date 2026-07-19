@@ -6,6 +6,7 @@ tmp/
 
 # Ignore contents of results directory
 results/*
+!results/proto.csv
 
 # But keep this specific file
 !results/consolidate_results.ipynb
