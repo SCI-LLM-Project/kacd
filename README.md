@@ -17,7 +17,7 @@ For a runnable, end-to-end example of the whole pipeline (KG construction -> pre
 - python query_kg.py && python query_llm.py && python query_rag.py && python query_causal_lit_kg.py && python query_causal_lit_llm.py && python query_causal_lit_rag.py (order doesn't matter)
 - run the "Combine all results" section of wflow.ipynb to create results/results_undirected_combined.csv
 - run query_directions_without_proto.py and/or query_directions_with_proto.py
-    - the proto model results are in `results/proto.csv`. This is used in `query_directions_with_proto.csv`
+    - the proto model results are in `data/proto/proto.csv`. This is used in `query_directions_with_proto.py`
 
 # Together AI Deployment Configuration
 - mistral-7b-instruct-v0.3
