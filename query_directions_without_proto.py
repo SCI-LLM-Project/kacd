@@ -1,11 +1,15 @@
 # %%
+import os
+
 import pandas as pd
 from tqdm.contrib.concurrent import thread_map
+
 import config
 from llm.factory import get_client
 from prompts.query_prompts.prompts_directions import *
 from context_construction.retriever_kgrag import retrieve_kgrag_context
 from context_construction.retriever_rag import retrieve_rag_context
+from models.AnswerSchema import DirectionAnswer as Answer
 
 # %%
 predictions = pd.read_csv("results/results_undirected_combined.csv", index_col=0)
@@ -40,8 +44,6 @@ rag_temporality = rag_df.drop(columns=temporality_drop)
 # ## Resolving Bidirectional Relationships
 
 # %%
-from models.AnswerSchema import DirectionAnswer as Answer
-
 generator = get_client(schema=Answer)
 
 # %%
@@ -259,7 +261,6 @@ print("\nAll resolutions complete!")
 
 # %%
 # Save all resolved dataframes to CSV files
-import os
 
 # Create output directory if it doesn't exist
 output_dir = "results/directional_resolved_without_proto"

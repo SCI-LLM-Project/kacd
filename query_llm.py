@@ -2,35 +2,24 @@
 import warnings
 
 import pandas as pd
+from sklearn.metrics import f1_score
 
-# %%
 # user defined imports
 from prompts.query_prompts.base_prompts import *
 from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
 import util.helpers as helpers
+from config import PROJECT_ROOT, def_map
+from models.AnswerSchema import BooleanAnswer as Answer
+from llm.factory import get_client
 
 # %%
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # %% [markdown]
-# ## Parameters
-
-# %%
-from config import PROJECT_ROOT
-
-# %% [markdown]
 # ## Setting up LLM
 
 # %%
-from models.AnswerSchema import BooleanAnswer as Answer
-
-# %%
-from llm.factory import get_client
-
 generator = get_client(schema=Answer)
-
-# %%
-from config import def_map
 
 # %%
 def query_llm_causality(row):
@@ -68,6 +57,5 @@ llm_res.to_csv("results/llm.csv")
 llm_res
 
 # %%
-from sklearn.metrics import f1_score
 print("RESULTS FOR LLM ONLY")
 print(f1_score(llm_res["Label"], llm_res["Plausibility"]))

@@ -1,47 +1,30 @@
 # %%
-import pandas as pd
-
-# %%
-# user defined imports
-from prompts.query_prompts.base_prompts import *
-import util.helpers as helpers
-
-# %%
 import warnings
 
-warnings.filterwarnings("ignore", category=FutureWarning)
+import pandas as pd
+from sklearn.metrics import f1_score
 
-# %% [markdown]
-# ## Parameters
-
-# %%
-from config import PROJECT_ROOT
-
-# %% [markdown]
-# ## Setting up LLM
-
-# %%
+# user defined imports
+from prompts.query_prompts.base_prompts import *
+from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
+import util.helpers as helpers
+from config import PROJECT_ROOT, def_map
 from models.AnswerSchema import BooleanAnswer as Answer
-
-# %%
 from llm.factory import get_client
-
-generator = get_client(schema=Answer)
-
-# %% [markdown]
-# # Local Retriever
-
-# %%
 # neo4j connection, vector index, embeddings, and the local-search context
 # builder all live in the shared retriever module (set up once at import time)
 from context_construction.retriever_kgrag import retrieve_kgrag_context
 
 # %%
-from config import def_map
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# %% [markdown]
+# ## Setting up LLM
 
 # %%
-from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
+generator = get_client(schema=Answer)
 
+# %%
 def query_local_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
     # bandaid for now
@@ -85,7 +68,6 @@ local_res.to_csv("results/kgrag.csv")
 local_res
 
 # %%
-from sklearn.metrics import f1_score
 print("RESULTS FOR LOCAL")
 print(f1_score(local_res["Label"], local_res["Plausibility"]))
 

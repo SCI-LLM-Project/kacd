@@ -1,39 +1,24 @@
 # %%
 import pandas as pd
+from sklearn.metrics import f1_score
+
 import util.helpers as helpers
 from prompts.query_prompts.base_prompts import *
-
-
-# %% [markdown]
-# # Important Paremeters
-
-# %%
-from config import PROJECT_ROOT
-
-# %%
-from config import def_map
-
-# %% [markdown]
-# # Retriever
-
-# %%
+from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
+from config import PROJECT_ROOT, def_map
 # corpus chunking, embedding, and the FAISS index all live in the shared
 # retriever module (built once at import time)
 from context_construction.retriever_rag import retrieve_rag_context
+from models.AnswerSchema import BooleanAnswer as Answer
+from llm.factory import get_client
 
 # %% [markdown]
 # # Setting Up RAG iterators
 
 # %%
-from models.AnswerSchema import BooleanAnswer as Answer
-
-# %%
-from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-from prompts.query_prompts.metric_prompts import plausibility_prompt, temporality_prompt, association_prompt
-
 def query_rag_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
     # bandaid for now
@@ -74,8 +59,6 @@ rag_res.to_csv("results/rag.csv")
 rag_res
 
 # %%
-from sklearn.metrics import f1_score
-
 f1_score(rag_res["Label"], rag_res["Plausibility"])
 
 # %%

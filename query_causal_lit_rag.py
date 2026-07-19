@@ -1,38 +1,23 @@
 # %%
 import pandas as pd
+
 import util.helpers as helpers
-
-# %% [markdown]
-# # Important Paremeters
-
-# %%
-from config import PROJECT_ROOT
-
-# %%
-from config import def_map
-
-# %% [markdown]
-# # Retriever
-
-# %%
+from config import PROJECT_ROOT, def_map
 # corpus chunking, embedding, and the FAISS index all live in the shared
 # retriever module (built once at import time)
 from context_construction.retriever_rag import retrieve_rag_context
+from models.AnswerSchema import CausalLitAnswer as Answer
+from llm.factory import get_client
+from prompts.query_prompts.causal_literature_prompts import query_rag_causal_lit_prompt
+from prompts.query_prompts.metric_prompts import causal_lit_prompt
 
 # %% [markdown]
 # # Setting Up RAG iterators
 
 # %%
-from models.AnswerSchema import CausalLitAnswer as Answer
-
-# %%
-from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-from prompts.query_prompts.causal_literature_prompts import query_rag_causal_lit_prompt
-from prompts.query_prompts.metric_prompts import causal_lit_prompt
-
 def query_rag_causality(row):
     var1, var2, label = row['var1'], row['var2'], row["label"]
     # bandaid for now

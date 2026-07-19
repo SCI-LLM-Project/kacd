@@ -1,11 +1,15 @@
 # %%
+import os
+
 import pandas as pd
 from tqdm.contrib.concurrent import thread_map
+
 import config
 from llm.factory import get_client
 from prompts.query_prompts.prompts_directions import *
 from context_construction.retriever_kgrag import retrieve_kgrag_context
 from context_construction.retriever_rag import retrieve_rag_context
+from models.AnswerSchema import DirectionAnswer as Answer
 
 # %%
 predictions = pd.read_csv("results/results_undirected_combined.csv", index_col=0)
@@ -49,8 +53,6 @@ rag_causal_lit = rag_df.drop(columns=causal_literature_drop)
 # ## Resolving Bidirectional Relationships
 
 # %%
-from models.AnswerSchema import DirectionAnswer as Answer
-
 generator = get_client(schema=Answer)
 
 # %%
@@ -224,8 +226,6 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
 
 # %%
 # Resolve bidirectional edges for all contexts and metrics
-
-import os
 
 # Create output directory if it doesn't exist
 output_dir = "results/directional_resolved_with_proto_and_causal_lit"
