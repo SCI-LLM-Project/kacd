@@ -1,5 +1,7 @@
 # %%
 import pandas as pd
+from tqdm.contrib.concurrent import thread_map
+import config
 from llm.factory import get_client
 from prompts.query_prompts.prompts_directions import *
 from context_construction.retriever_kgrag import retrieve_kgrag_context
@@ -143,11 +145,8 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
     ]
     
     print(f"Found {len(pairs_to_resolve)} bidirectional pairs to resolve for {metric_col} using prompt")
-    
-    # Query LLM for each pair
-    results = []
-    for i, pair in enumerate(pairs_to_resolve):
-        report = None
+
+    def _resolve_pair(pair):
         try:
             var1, var2 = pair
             prev_report = df[(df['Var1'] == var1) & (df['Var2'] == var2)][f'{metric_report_col}'].iloc[0]
@@ -156,12 +155,12 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
                 new_report = retrieve_rag_context(DIRECT_CAUSAL_PROMPT(var1, var2))
             elif report_type == 'KG-RAG':
                 new_report = retrieve_kgrag_context(DIRECT_CAUSAL_PROMPT(var1, var2))
-            else: 
+            else:
                 new_report = ''
-            
+
             response = generator(prompt_func(var1, var2, new_report), sampling_params={"n":1,"temperature":0.0, "top_k":1})
-            
-            results.append({
+
+            return {
                 'Var1': var1 if response.conclusion == 'A' else var2,
                 'Var2': var2 if response.conclusion == 'A' else var1,
                 metric_col: True,
@@ -169,13 +168,11 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
                 'Direction Report': new_report,
                 metric_report_col: prev_report,
                 'Direction_Resolved': True
-            })
-            
-            print(f"[{i+1}/{len(pairs_to_resolve)}] {var1} - {var2}: {response.conclusion}")
-            
+            }
+
         except Exception as e:
             print(f"Error processing {pair}: {e}")
-            results.append({
+            return {
                 'Var1': pair[0],
                 'Var2': pair[1],
                 metric_col: True,
@@ -183,8 +180,13 @@ def resolve_bidirectional_edges(df, metric_col, metric_reasoning_col, metric_rep
                 'Direction Report': '',
                 metric_report_col: '',
                 'Direction_Resolved': True
-            })
-    
+            }
+
+    # Query LLM for each pair concurrently
+    results = thread_map(
+        _resolve_pair, pairs_to_resolve, max_workers=config.LLM_MAX_WORKERS, desc=f"Resolving {metric_col}"
+    )
+
     # Combine with resolved directions
     if results:
         resolved_df = pd.DataFrame(results)
