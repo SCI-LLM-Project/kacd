@@ -119,3 +119,84 @@ def community_analysis(community_size_df: pd.DataFrame):
     )
     return percentiles_df
 
+def consolidate_causal_literature(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Consolidates causal literature predictions by self-joining to match both
+    representations of the same directed edge.
+
+    For edge (Var1, Var2), checks if either:
+    - (Var1, Var2) has label 'A' (var1 causes var2)
+    - (Var2, Var1) has label 'B' (var2 causes var1, i.e., var1 causes var2)
+
+    Returns a dataframe with directional predictions for each edge.
+    """
+    df = df.copy()
+
+    # Create directional flags
+    df["Forward"] = df["Causal Literature"] == "A"
+    df["Reverse"] = df["Causal Literature"] == "B"
+
+    # Self-join to match (Var1, Var2) with (Var2, Var1)
+    df = df.merge(
+        df,
+        how="outer",
+        left_on=["Var1", "Var2"],
+        right_on=["Var2", "Var1"],
+        suffixes=("", "_rev")
+    )
+
+    # Sex and Age and PEG are only in 1 direction,
+    df = df.dropna(subset=['Var1', 'Var2'])
+
+    # Fill NaN values in boolean columns with False
+    df["Forward"] = df["Forward"].fillna(False)
+    df["Reverse_rev"] = df["Reverse_rev"].fillna(False)
+
+    # Create consolidated prediction: True if either representation indicates Var1→Var2
+    df["Causal Literature Prediction"] = df["Forward"] | df["Reverse_rev"]
+
+    # Use reasoning and report from whichever direction indicated the relationship
+    # Handle edge cases explicitly:
+    # 1. If Forward is True: use forward reasoning
+    # 2. If Reverse_rev is True (and Forward is False): use reverse reasoning
+    # 3. If both are False and forward reasoning exists: use forward reasoning
+    # 4. Otherwise: use reverse reasoning as fallback
+    reasoning_conditions = [
+        df["Forward"],  # Case 1: Forward is True
+        df["Reverse_rev"],  # Case 2: Reverse_rev is True (Forward is False)
+        df["Causal Literature Reasoning"].notna(),  # Case 3: Both False, forward exists
+    ]
+
+    reasoning_choices = [
+        df["Causal Literature Reasoning"],  # Use forward reasoning
+        df["Causal Literature Reasoning_rev"],  # Use reverse reasoning
+        df["Causal Literature Reasoning"],  # Use forward reasoning
+    ]
+
+    df["Causal Literature Prediction Reasoning"] = np.select(
+        reasoning_conditions,
+        reasoning_choices,
+        default=df["Causal Literature Reasoning_rev"]  # Case 4: Fallback to reverse
+    )
+
+    report_conditions = [
+        df["Forward"],  # Case 1: Forward is True
+        df["Reverse_rev"],  # Case 2: Reverse_rev is True (Forward is False)
+        df["Causal Literature Report"].notna(),  # Case 3: Both False, forward exists
+    ]
+
+    report_choices = [
+        df["Causal Literature Report"],  # Use forward reasoning
+        df["Causal Literature Report_rev"],  # Use reverse reasoning
+        df["Causal Literature Report"],  # Use forward reasoning
+    ]
+
+    df["Causal Literature Report"] = np.select(
+        report_conditions,
+        report_choices,
+        default=df["Causal Literature Report_rev"]  # Case 4: Fallback to reverse
+    )
+
+    # Return only the essential columns
+    return df[["Var1", "Var2", "Causal Literature Prediction", "Causal Literature Prediction Reasoning", "Causal Literature Report"]]
+
