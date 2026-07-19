@@ -3,6 +3,9 @@
 # Instructions for use
 
 This repository contains code for creating a Knowledge Graph using structured output from LLMs. 
+
+For a runnable, end-to-end example of the whole pipeline (KG construction -> predictions -> consolidation -> directed results), see `wflow.ipynb` - it runs every script below in order and is the fastest way to understand how the pieces fit together.
+
 # How to create graph
 - start neo4j in docker
 - python construct_kg.py
@@ -12,8 +15,8 @@ This repository contains code for creating a Knowledge Graph using structured ou
 - Make sure LLM_API_KEY is set in .env, and config.py's LLM_MODEL points at the Together model/endpoint you want
 - Make sure neo4j is running in docker
 - python query_kg.py && python query_llm.py && python query_rag.py && python query_causal_lit_kg.py && python query_causal_lit_llm.py && python query_causal_lit_rag.py (order doesn't matter)
-- in results, run the consolidate notebook to create results_dec_combined.csv 
-- run query_directions_without_proto.py
+- run the "Combine all results" section of wflow.ipynb to create results/results_undirected_combined.csv
+- run query_directions_without_proto.py and/or query_directions_with_proto.py
 
 # how to dump a database
 

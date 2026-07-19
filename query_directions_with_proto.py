@@ -8,7 +8,7 @@ from context_construction.retriever_kgrag import retrieve_kgrag_context
 from context_construction.retriever_rag import retrieve_rag_context
 
 # %%
-predictions = pd.read_csv("results/results_dec_combined.csv", index_col=0)
+predictions = pd.read_csv("results/results_undirected_combined.csv", index_col=0)
 proto = pd.read_csv("results/proto.csv")
 proto["Proto"] = True
 predictions = predictions.merge(proto, how = 'left', on = ['Var1', 'Var2'])

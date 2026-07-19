@@ -8,7 +8,7 @@ from context_construction.retriever_kgrag import retrieve_kgrag_context
 from context_construction.retriever_rag import retrieve_rag_context
 
 # %%
-predictions = pd.read_csv("results/results_dec_combined.csv", index_col=0)
+predictions = pd.read_csv("results/results_undirected_combined.csv", index_col=0)
 
 # %%
 kg_llm_df = predictions[predictions['context'] == 'kg+llm_full.csv']
@@ -262,25 +262,25 @@ print("\nAll resolutions complete!")
 import os
 
 # Create output directory if it doesn't exist
-output_dir = "results/directional_resolved_causal_test3"
+output_dir = "results/directional_resolved_without_proto"
 os.makedirs(output_dir, exist_ok=True)
 
 # Save KG+LLM context
-kg_llm_plausibility_resolved.to_csv(f"{output_dir}/kg_llm_plausibility_resolved.csv", index=False)
-kg_llm_association_resolved.to_csv(f"{output_dir}/kg_llm_association_resolved.csv", index=False)
-kg_llm_temporality_resolved.to_csv(f"{output_dir}/kg_llm_temporality_resolved.csv", index=False)
+kg_llm_plausibility_resolved.to_csv(f"{output_dir}/kg_llm_plausibility_without_proto_resolved.csv", index=False)
+kg_llm_association_resolved.to_csv(f"{output_dir}/kg_llm_association_without_proto_resolved.csv", index=False)
+kg_llm_temporality_resolved.to_csv(f"{output_dir}/kg_llm_temporality_without_proto_resolved.csv", index=False)
 
 
 # Save LLM context
-llm_plausibility_resolved.to_csv(f"{output_dir}/llm_plausibility_resolved.csv", index=False)
-llm_association_resolved.to_csv(f"{output_dir}/llm_association_resolved.csv", index=False)
-llm_temporality_resolved.to_csv(f"{output_dir}/llm_temporality_resolved.csv", index=False)
+llm_plausibility_resolved.to_csv(f"{output_dir}/llm_plausibility_without_proto_resolved.csv", index=False)
+llm_association_resolved.to_csv(f"{output_dir}/llm_association_without_proto_resolved.csv", index=False)
+llm_temporality_resolved.to_csv(f"{output_dir}/llm_temporality_without_proto_resolved.csv", index=False)
 
 
 # Save RAG context
-rag_plausibility_resolved.to_csv(f"{output_dir}/rag_plausibility_resolved.csv", index=False)
-rag_association_resolved.to_csv(f"{output_dir}/rag_association_resolved.csv", index=False)
-rag_temporality_resolved.to_csv(f"{output_dir}/rag_temporality_resolved.csv", index=False)
+rag_plausibility_resolved.to_csv(f"{output_dir}/rag_plausibility_without_proto_resolved.csv", index=False)
+rag_association_resolved.to_csv(f"{output_dir}/rag_association_without_proto_resolved.csv", index=False)
+rag_temporality_resolved.to_csv(f"{output_dir}/rag_temporality_without_proto_resolved.csv", index=False)
 
 
 print(f"All resolved dataframes saved to {output_dir}/")

@@ -88,10 +88,6 @@ graph.add_graph_documents(
     include_source=True
 )
 
-# %%
-data = pd.DataFrame(graph.query("match (n:__Entity__)-[r]->(m:__Entity__) return n.id, n.description, r.strength, type(r), r.description, m.id, m.description order by type(r), n.id asc"))
-data.to_csv("tmp/quick_analysis.csv")
-data
 
 # %% [markdown]
 # # Entity Resolution
