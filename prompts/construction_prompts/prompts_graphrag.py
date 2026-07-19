@@ -2,10 +2,7 @@
 # Licensed under the MIT License
 
 """A file containing prompts definition."""
-import json
-
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
+from config import def_map
 
 def graphrag_extraction_prompt(input):
     GRAPH_EXTRACTION_PROMPT = f"""

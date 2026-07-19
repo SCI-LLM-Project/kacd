@@ -13,7 +13,6 @@ from prompts.query_prompts.base_prompts import *
 import util.helpers as helpers
 
 # %%
-import json
 import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -70,9 +69,7 @@ context = {}
 lc_retrieval_query = helpers.load_query("local_search.cypher")
 
 # %%
-# variables of interest
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
+from config import def_map
 
 # %%
 db_query(

@@ -1,5 +1,4 @@
 # %%
-import json
 import warnings
 
 import pandas as pd
@@ -32,9 +31,7 @@ from llm.factory import get_client
 generator = get_client(schema=Answer)
 
 # %%
-# variables of interest
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
+from config import def_map
 
 # %%
 def llm_retriever(query, var1, var2, debug=False):

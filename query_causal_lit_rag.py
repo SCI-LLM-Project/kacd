@@ -4,7 +4,6 @@ import faiss, glob, os
 import numpy as np
 import pandas as pd
 import util.helpers as helpers
-import json
 
 # %% [markdown]
 # # Important Paremeters
@@ -13,9 +12,7 @@ import json
 from config import PROJECT_ROOT
 
 # %%
-# variables of interest
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
+from config import def_map
 
 # %% [markdown]
 # # Markdown parsing and chunking

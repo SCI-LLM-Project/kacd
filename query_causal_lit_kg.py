@@ -4,7 +4,6 @@ from tqdm import tqdm
 from typing import Dict, Any
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
-import json
 
 import pandas as pd
 
@@ -70,9 +69,7 @@ context = {}
 lc_retrieval_query = helpers.load_query("local_search.cypher")
 
 # %%
-# variables of interest
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
+from config import def_map
 
 # %%
 db_query(

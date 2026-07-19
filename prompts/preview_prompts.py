@@ -11,9 +11,9 @@ the prompts package, so it needs the repo root on sys.path for the absolute
 prompts.query_prompts.* / prompts.construction_prompts.* imports to resolve):
     python -m prompts.preview_prompts
 """
-import json
 import os
 
+from config import def_map
 from prompts.query_prompts.metric_prompts import (
     plausibility_prompt,
     temporality_prompt,
@@ -41,9 +41,6 @@ from prompts.construction_prompts.extraction_prompts import (
     graph_extraction_prompt,
     summarize_community,
 )
-
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
 
 os.makedirs("raw_prompts", exist_ok=True)
 

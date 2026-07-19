@@ -1,4 +1,10 @@
+import json
+
 PROJECT_ROOT = "~/kacd_submission"
+
+# variables of interest - shared definitions used across query prompts
+with open("variable_definitions/default_definitions.json", "r") as file:
+    def_map = json.load(file)
 
 NEO4J_URI = "bolt://localhost:7688"
 NEO4J_USERNAME = "neo4j"

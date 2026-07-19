@@ -1,7 +1,4 @@
-import json
-
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
+from config import def_map
 
 def DIRECT_CAUSAL_PROMPT(var1, var2):
     return f"""Question: Which causal direction is more likely?
