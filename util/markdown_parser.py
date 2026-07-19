@@ -1,6 +1,8 @@
 import re
 import os
 
+import config
+
 def read_markdown_file(file_path):
     """
     Basic function to read a markdown file
@@ -51,23 +53,29 @@ def process_markdown_paper(file_path):
 
     return content.strip()
 
-def semantic_chunk(text, max_chunk_tokens=600, overlap_tokens=100):
+def semantic_chunk(text, model_name=config.TOKENIZER_MODEL, max_chunk_tokens=600, overlap_tokens=100):
     """
-    Chunk text using LangChain's TokenTextSplitter.
+    Chunk text using LangChain's SentenceTransformersTokenTextSplitter, so chunk
+    sizes are measured with the given model's own tokenizer - by default the
+    same tokenizer (config.TOKENIZER_MODEL) used for context-window budgeting
+    elsewhere in the pipeline, instead of TokenTextSplitter's hardcoded tiktoken
+    encoding.
 
     Args:
         text: The text to chunk
+        model_name: HuggingFace model whose tokenizer sizes the chunks (default: config.TOKENIZER_MODEL)
         max_chunk_tokens: Maximum size of each chunk in tokens (default: 600)
         overlap_tokens: Number of tokens to overlap between chunks (default: 100)
 
     Returns:
         List of text chunks
     """
-    from langchain.text_splitter import TokenTextSplitter
+    from langchain_text_splitters import SentenceTransformersTokenTextSplitter
 
-    splitter = TokenTextSplitter(
-        chunk_size=max_chunk_tokens,
-        chunk_overlap=overlap_tokens
+    splitter = SentenceTransformersTokenTextSplitter(
+        model_name=model_name,
+        tokens_per_chunk=max_chunk_tokens,
+        chunk_overlap=overlap_tokens,
     )
     return splitter.split_text(text)
 
