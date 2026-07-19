@@ -353,7 +353,7 @@ RETURN c.id AS communityId, c.level as level,
 context_window_limit = 8000
 
 # %%
-from build_context import split_and_sort, summarize_leaves, normalize_nonleaves, summarize_nonleaves
+from context_construction.build_context import split_and_sort, summarize_leaves, normalize_nonleaves, summarize_nonleaves
 
 raw_leaves, raw_nonleaves = split_and_sort(community_info) 
 leaves_with_reports, leaves_reports_map = summarize_leaves(raw_leaves, context_window_limit)
@@ -363,7 +363,7 @@ nonleaves_normalized = normalize_nonleaves(raw_nonleaves, leaves_reports_map)
 nonleaves_with_reports = summarize_nonleaves(nonleaves_normalized, context_window_limit)
 
 # %%
-from build_context import normalize_summarized_community
+from context_construction.build_context import normalize_summarized_community
 
 leaves = list(
     map(normalize_summarized_community, leaves_with_reports)

@@ -1,4 +1,4 @@
-from build_context import stringify_report, format_triplet, construct_query_context
+from context_construction.build_context import stringify_report, format_triplet, construct_query_context
 from config import *
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.embeddings import HuggingFaceEmbeddings

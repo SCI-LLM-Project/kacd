@@ -2,8 +2,8 @@
 import pandas as pd
 from llm.factory import get_client
 from prompts.query_prompts.prompts_directions import *
-from retriever_kgrag import retrieve_kgrag_context
-from retriever_rag import retrieve_rag_context
+from context_construction.retriever_kgrag import retrieve_kgrag_context
+from context_construction.retriever_rag import retrieve_rag_context
 
 # %%
 predictions = pd.read_csv("results/results_dec_combined.csv", index_col=0)

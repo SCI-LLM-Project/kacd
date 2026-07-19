@@ -122,7 +122,7 @@ lc_vector = Neo4jVector.from_existing_index(
 
 # %%
 from util.helpers import *
-from build_context import stringify_report, format_triplet, construct_query_context
+from context_construction.build_context import stringify_report, format_triplet, construct_query_context
 from config import query_context_window
 
 # remember to clear the context cache when changing the summary prompt
