@@ -42,7 +42,7 @@ def process_markdown_paper(file_path):
 
     return content.strip()
 
-def semantic_chunk(text, tokenizer=None, model_name=None, max_chunk_tokens=600, overlap_tokens=100):
+def chunk(text, tokenizer=None, model_name=None, max_chunk_tokens=600, overlap_tokens=100):
     """
     Chunk text on token boundaries using a plain HuggingFace tokenizer, via
     LangChain's Tokenizer/split_text_on_tokens (the same mechanism

@@ -48,10 +48,10 @@ files = Path(DIRECTORY).glob('**/*.md')
 for file in files:
     print(file)
     if os.path.isfile(file):
-        # simple markdown parser that removes citations, urls, references, acknowledgements, and basically everything after the conclusion
+        # just reads markdown file into a string
         content = markdown_parser.process_markdown_paper(str(file))
-        # semantic chunk is chunking w.r.t sentences, and has overlap param as well
-        chunks.extend(markdown_parser.semantic_chunk(content))
+        # 600 token chunk with 100 token overlap
+        chunks.extend(markdown_parser.chunk(content))
 
 # %%
 len(chunks)
