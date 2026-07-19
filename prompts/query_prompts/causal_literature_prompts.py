@@ -1,13 +1,3 @@
-from pathlib import Path
-
-import json
-
-with open("variable_definitions/default_definitions.json", "r") as file:
-    default = json.load(file)
-
-with open("variable_definitions/ontological_definitions.json", "r") as file:
-    ontology = json.load(file)
-
 OUTPUT_FORMAT = "A, B, or C"
 
 def query_kg_causal_lit_prompt(question, var1, var2, report, definitions, debug=False):
