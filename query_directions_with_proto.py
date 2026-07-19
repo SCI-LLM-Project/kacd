@@ -26,7 +26,7 @@ llm_df = predictions[predictions['context'] == 'llm_full.csv']
 rag_df = predictions[predictions['context'] == 'rag_full.csv']
 
 # %%
-# Define columns to drop for each type
+# Define columns to drop for each type. Essentially a mask
 # causal literature IS resolved here (unlike query_directions_without_proto.py)
 # because we want to compare it against the proto model
 plausibility_drop = ['Association', 'Association Reasoning', 'Temporality', 'Temporality Reasoning', 'context', "Causal Literature Prediction", "Causal Literature Prediction Reasoning"]

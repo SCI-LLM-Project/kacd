@@ -21,7 +21,7 @@ llm_df = predictions[predictions['context'] == 'llm_full.csv']
 rag_df = predictions[predictions['context'] == 'rag_full.csv']
 
 # %%
-# Define columns to drop for each type
+# Define columns to drop for each type. Essentially a mask
 # causal literature is dropped entirely: it stands alone and already accounts
 # for direction, so it needs no resolution here (query_directions_with_proto.py
 # does resolve it, to compare it against the proto model)
