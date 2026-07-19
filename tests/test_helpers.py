@@ -152,3 +152,101 @@ class TestBatchRowAssembly:
 
         assert all(row[2] is True for row in rows)
         assert all(row[3] != "" for row in rows)
+
+
+class TestConsolidateCausalLiterature:
+    """consolidate_causal_literature turns per-direction A/B/C answers into one
+    boolean prediction per directed edge: (V1,V2) is True iff (V1,V2) answered
+    'A' or (V2,V1) answered 'B' (both meaning V1 -> V2)."""
+
+    def _df(self):
+        rows = [
+            # agreement: 'A' fwd + 'B' rev both mean V1 -> V2
+            ("Anxiety", "Depression", "A", "fwd says A", "rep f1"),
+            ("Depression", "Anxiety", "B", "rev says B", "rep r1"),
+            # agreement on no relation
+            ("Alcohol", "Smoking", "C", "fwd says C", "rep f2"),
+            ("Smoking", "Alcohol", "C", "rev says C", "rep r2"),
+            # conflict: both directions claim 'A'
+            ("Pain", "Mobility", "A", "fwd says A", "rep f3"),
+            ("Mobility", "Pain", "A", "rev says A", "rep r3"),
+            # edge carried only by the reverse row's answer
+            ("Stress", "Sleep", "C", "fwd says C", "rep f4"),
+            ("Sleep", "Stress", "A", "rev says A", "rep r4"),
+            # one-directional rows (Sex/Age/PEG style, no reverse in the data)
+            ("Sex", "Anxiety", "A", "sex says A", "rep s"),
+            ("Age", "Pain", "B", "age says B (impossible direction)", "rep a"),
+            # failed-call placeholder from the query scripts: 'C' + empty strings
+            ("Obesity", "Fatigue", "C", "", ""),
+            ("Fatigue", "Obesity", "A", "rev says A", "rep r5"),
+        ]
+        return pd.DataFrame(
+            rows,
+            columns=["Var1", "Var2", "Causal Literature", "Causal Literature Reasoning", "Causal Literature Report"],
+        )
+
+    def _pred(self, out, v1, v2):
+        return bool(out[(out["Var1"] == v1) & (out["Var2"] == v2)]["Causal Literature Prediction"].iloc[0])
+
+    def _reasoning(self, out, v1, v2):
+        return out[(out["Var1"] == v1) & (out["Var2"] == v2)]["Causal Literature Prediction Reasoning"].iloc[0]
+
+    def test_one_output_row_per_input_row_no_duplicates(self):
+        df = self._df()
+        out = helpers.consolidate_causal_literature(df)
+
+        assert len(out) == len(df)
+        assert out.duplicated(subset=["Var1", "Var2"]).sum() == 0
+
+    def test_a_forward_and_b_reverse_agree_on_forward_edge(self):
+        out = helpers.consolidate_causal_literature(self._df())
+
+        assert self._pred(out, "Anxiety", "Depression") is True
+        assert self._pred(out, "Depression", "Anxiety") is False
+
+    def test_c_both_ways_is_false_both_ways(self):
+        out = helpers.consolidate_causal_literature(self._df())
+
+        assert self._pred(out, "Alcohol", "Smoking") is False
+        assert self._pred(out, "Smoking", "Alcohol") is False
+
+    def test_edge_recovered_from_reverse_rows_answer(self):
+        # (Stress, Sleep) answered 'C' but (Sleep, Stress) answered 'A':
+        # only the Sleep -> Stress edge should be predicted
+        out = helpers.consolidate_causal_literature(self._df())
+
+        assert self._pred(out, "Sleep", "Stress") is True
+        assert self._pred(out, "Stress", "Sleep") is False
+
+    def test_one_directional_rows_survive_the_self_merge(self):
+        out = helpers.consolidate_causal_literature(self._df())
+
+        assert self._pred(out, "Sex", "Anxiety") is True
+        # 'B' on a one-directional row claims the direction the data excludes
+        assert self._pred(out, "Age", "Pain") is False
+
+    def test_failed_placeholder_edge_recovered_from_reverse_row(self):
+        # (Obesity, Fatigue) is a failed-call 'C' placeholder, but the reverse
+        # direction answered 'A' - the Fatigue -> Obesity edge survives
+        out = helpers.consolidate_causal_literature(self._df())
+
+        assert self._pred(out, "Fatigue", "Obesity") is True
+        assert self._pred(out, "Obesity", "Fatigue") is False
+
+    def test_reasoning_comes_from_the_direction_that_drove_the_prediction(self):
+        out = helpers.consolidate_causal_literature(self._df())
+
+        # each of these rows answered 'A' itself, so its own (Forward) reasoning is used
+        assert self._reasoning(out, "Anxiety", "Depression") == "fwd says A"
+        assert self._reasoning(out, "Sleep", "Stress") == "rev says A"
+        assert self._reasoning(out, "Mobility", "Pain") == "rev says A"
+
+    def test_a_a_conflict_yields_both_directions_true(self):
+        """Documents current behavior, not an endorsement: contradictory A/A
+        answers pass through as a bidirectional edge. The with_proto direction
+        resolution catches these downstream (both_true); the standalone
+        consolidated output does not."""
+        out = helpers.consolidate_causal_literature(self._df())
+
+        assert self._pred(out, "Pain", "Mobility") is True
+        assert self._pred(out, "Mobility", "Pain") is True
