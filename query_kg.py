@@ -3,6 +3,7 @@ import warnings
 
 import pandas as pd
 from sklearn.metrics import f1_score
+from tqdm import tqdm
 
 # user defined imports
 from prompts.query_prompts.base_prompts import *
@@ -25,31 +26,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 generator = get_client(schema=Answer)
 
 # %%
-def query_local_causality(row):
-    var1, var2, label = row['var1'], row['var2'], row["label"]
-    # bandaid for now
-    var1 = "Sleep disturbance" if var1 == "Sleep" else var1
-    var2 = "Sleep disturbance" if var2 == "Sleep" else var2
-
-    pquery = plausibility_prompt(var1, var2)
-    preport = retrieve_kgrag_context(pquery)
-    presponse = generator(query_kg_prompt(pquery, var1, var2, preport, def_map))
-
-    aquery = association_prompt(var1, var2)
-    areport = retrieve_kgrag_context(aquery)
-    aresponse = generator(query_kg_prompt(aquery, var1, var2, areport, def_map))
-
-    tquery = temporality_prompt(var1, var2)
-    treport = retrieve_kgrag_context(tquery)
-    tresponse = generator(query_kg_prompt(tquery, var1, var2, treport, def_map))
-
-    return [var1, var2,
-            presponse.conclusion, helpers.reasoning_to_string(presponse),
-            aresponse.conclusion, helpers.reasoning_to_string(aresponse),
-            tresponse.conclusion, helpers.reasoning_to_string(tresponse),
-            preport, areport, treport, label]
-
-# %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
 # %% [markdown]
@@ -59,11 +35,67 @@ full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnam
 # ## Local Search
 
 # %%
-res = helpers.parallel_apply(full, query_local_causality)
+# Phase 1: build all queries and retrieve all contexts (no LLM calls).
+pairs = [
+    # bandaid for now
+    ("Sleep disturbance" if row["var1"] == "Sleep" else row["var1"],
+     "Sleep disturbance" if row["var2"] == "Sleep" else row["var2"],
+     row["label"])
+    for _, row in full.iterrows()
+]
+
+pqueries = [plausibility_prompt(var1, var2) for var1, var2, _ in pairs]
+aqueries = [association_prompt(var1, var2) for var1, var2, _ in pairs]
+tqueries = [temporality_prompt(var1, var2) for var1, var2, _ in pairs]
+
+# %%
+preports = [retrieve_kgrag_context(query) for query in tqdm(pqueries, desc="Plausibility retrieval")]
+areports = [retrieve_kgrag_context(query) for query in tqdm(aqueries, desc="Association retrieval")]
+treports = [retrieve_kgrag_context(query) for query in tqdm(tqueries, desc="Temporality retrieval")]
+
+# %%
+# Phase 2: one batched LLM call per metric via the client's .map() - concurrent,
+# progress bar, and per-item failure isolation built in (a failed call comes back as None)
+pprompts = [
+    query_kg_prompt(query, var1, var2, report, def_map)
+    for (var1, var2, _), query, report in zip(pairs, pqueries, preports)
+]
+aprompts = [
+    query_kg_prompt(query, var1, var2, report, def_map)
+    for (var1, var2, _), query, report in zip(pairs, aqueries, areports)
+]
+tprompts = [
+    query_kg_prompt(query, var1, var2, report, def_map)
+    for (var1, var2, _), query, report in zip(pairs, tqueries, treports)
+]
+
+presponses = generator.map(pprompts)
+aresponses = generator.map(aprompts)
+tresponses = generator.map(tprompts)
+
+# %%
+# Phase 3: assemble rows. a failed call keeps its row, with the negative class
+# (False) and empty reasoning - only the failed metric is affected, the row's
+# other metrics keep their real answers
+def conclusion_of(response):
+    return response.conclusion if response is not None else False
+
+def reasoning_of(response):
+    return helpers.reasoning_to_string(response) if response is not None else ""
+
+rows = [
+    [var1, var2,
+     conclusion_of(presponse), reasoning_of(presponse),
+     conclusion_of(aresponse), reasoning_of(aresponse),
+     conclusion_of(tresponse), reasoning_of(tresponse),
+     preport, areport, treport, label]
+    for (var1, var2, label), presponse, aresponse, tresponse, preport, areport, treport
+    in zip(pairs, presponses, aresponses, tresponses, preports, areports, treports)
+]
 
 # %%
 columns = "Var1", "Var2", "Plausibility", "Plausibility Reasoning", "Association", "Association Reasoning", "Temporality", "Temporality Reasoning", "Plausibility Report", "Association Report", "Temporality Report", "Label"
-local_res = pd.DataFrame(res.to_list(), columns=columns)
+local_res = pd.DataFrame(rows, columns=columns)
 local_res.to_csv("results/kgrag.csv")
 local_res
 

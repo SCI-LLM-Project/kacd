@@ -2,6 +2,7 @@
 import warnings
 
 import pandas as pd
+from tqdm import tqdm
 
 # user defined imports
 from prompts.query_prompts.causal_literature_prompts import *
@@ -24,18 +25,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 generator = get_client(schema=Answer)
 
 # %%
-def query_local_causality(row):
-    var1, var2, label = row['var1'], row['var2'], row["label"]
-    # bandaid for now
-    var1 = "Sleep disturbance" if var1 == "Sleep" else var1
-    var2 = "Sleep disturbance" if var2 == "Sleep" else var2
-
-    clquery = causal_lit_prompt(var1, var2)
-    clreport = retrieve_kgrag_context(clquery)
-    clresponse = generator(query_kg_causal_lit_prompt(clquery, var1, var2, clreport, def_map))
-    return [var1, var2, clresponse.conclusion, helpers.reasoning_to_string_multiple_choice(clresponse), clreport, label]
-
-# %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
 # %% [markdown]
@@ -45,10 +34,43 @@ full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnam
 # ## Local Search
 
 # %%
-res = helpers.parallel_apply(full, query_local_causality)
+# Phase 1: build all queries and retrieve all contexts (no LLM calls).
+pairs = [
+    # bandaid for now
+    ("Sleep disturbance" if row["var1"] == "Sleep" else row["var1"],
+     "Sleep disturbance" if row["var2"] == "Sleep" else row["var2"],
+     row["label"])
+    for _, row in full.iterrows()
+]
+
+clqueries = [causal_lit_prompt(var1, var2) for var1, var2, _ in pairs]
+
+# %%
+clreports = [retrieve_kgrag_context(query) for query in tqdm(clqueries, desc="Causal literature retrieval")]
+
+# %%
+# Phase 2: one batched LLM call via the client's .map() - concurrent, progress
+# bar, and per-item failure isolation built in (a failed call comes back as None)
+clprompts = [
+    query_kg_causal_lit_prompt(query, var1, var2, report, def_map)
+    for (var1, var2, _), query, report in zip(pairs, clqueries, clreports)
+]
+
+clresponses = generator.map(clprompts)
+
+# %%
+# Phase 3: assemble rows. a failed call keeps its row, with the negative class
+# ('C', no causal relationship) and empty reasoning
+rows = [
+    [var1, var2,
+     clresponse.conclusion if clresponse is not None else "C",
+     helpers.reasoning_to_string_multiple_choice(clresponse) if clresponse is not None else "",
+     clreport, label]
+    for (var1, var2, label), clresponse, clreport in zip(pairs, clresponses, clreports)
+]
 
 # %%
 columns = "Var1", "Var2", "Causal Literature",  "Causal Literature Reasoning", "Causal Literature Report", "Label"
-local_res = pd.DataFrame(res.to_list(), columns=columns)
+local_res = pd.DataFrame(rows, columns=columns)
 local_res.to_csv("results/kg+rag_full_causal_literature.csv")
 local_res

@@ -21,16 +21,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 generator = get_client(schema=Answer)
 
 # %%
-def query_llm_causality(row):
-    var1, var2, label = row['var1'], row['var2'], row["label"]
-    # bandaid for now
-    var1 = "Sleep disturbance" if var1 == "Sleep" else var1
-    var2 = "Sleep disturbance" if var2 == "Sleep" else var2
-
-    clresponse = generator(query_llm_causal_lit_prompt(causal_lit_prompt(var1, var2), var1, var2, def_map))
-    return [var1, var2, clresponse.conclusion, helpers.reasoning_to_string_multiple_choice(clresponse), label]
-
-# %%
 full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnamed: 0"])
 
 # %% [markdown]
@@ -40,10 +30,37 @@ full = pd.read_csv(f"{PROJECT_ROOT}/data/full_cleaned.csv").drop(columns=["Unnam
 # ## LLM
 
 # %%
-res = helpers.parallel_apply(full, query_llm_causality)
+# build every pair's prompt up front (cheap, no I/O), then dispatch all the LLM
+# calls in one batch via the client's .map() - concurrent, progress bar, and
+# per-item failure isolation built in (a failed call comes back as None)
+pairs = [
+    # bandaid for now
+    ("Sleep disturbance" if row["var1"] == "Sleep" else row["var1"],
+     "Sleep disturbance" if row["var2"] == "Sleep" else row["var2"],
+     row["label"])
+    for _, row in full.iterrows()
+]
+
+prompts = [
+    query_llm_causal_lit_prompt(causal_lit_prompt(var1, var2), var1, var2, def_map)
+    for var1, var2, _ in pairs
+]
+
+# %%
+responses = generator.map(prompts)
+
+# %%
+# a failed call keeps its row: 'C' (no causal relationship) with empty reasoning
+rows = [
+    [var1, var2,
+     response.conclusion if response is not None else "C",
+     helpers.reasoning_to_string_multiple_choice(response) if response is not None else "",
+     label]
+    for (var1, var2, label), response in zip(pairs, responses)
+]
 
 # %%
 columns = "Var1", "Var2", "Causal Literature",  "Causal Literature Reasoning", "Label"
-llm_res = pd.DataFrame(res.to_list(), columns=columns)
+llm_res = pd.DataFrame(rows, columns=columns)
 llm_res.to_csv("results/llm_full_causal_literature.csv")
 llm_res
