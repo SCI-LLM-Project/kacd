@@ -71,7 +71,7 @@ def chunk(text, tokenizer=None, model_name=None, max_chunk_tokens=600, overlap_t
             # same tokenizer used for context-window budgeting everywhere else
             # in the pipeline - imported lazily so plain `import
             # util.markdown_parser` doesn't force this load on callers who
-            # only want e.g. remove_end_sections
+            # only want e.g. process_markdown_paper
             import util.helpers as helpers
             tokenizer = helpers.tokenizer
         else:
