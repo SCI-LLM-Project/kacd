@@ -96,7 +96,7 @@ class LLMGraphTransformer:
 
         self.prompt = prompt
         self.schema = schema
-        self.gleanings = gleanings
+        self.gleanings = gleanings # unused
         self.structured_llm = get_client(schema=self.schema)
 
     def process_response(
