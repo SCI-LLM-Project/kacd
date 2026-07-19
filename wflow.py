@@ -7,22 +7,38 @@ directed results) end to end as a plain script
     # Ctrl-b d to detach; tmux attach -t wflow to reattach later
 
 """
+import os
 import subprocess
+from datetime import datetime
 
 import pandas as pd
 
 from util.helpers import consolidate_causal_literature
 
+LOG_PATH = "log/log.out"
+os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+
+def run(script):
+    """Run a pipeline script with its stdout and stderr appended to LOG_PATH
+    under a timestamped header. Nothing shows in the terminal while a script
+    runs - follow along with `tail -f log/log.out`."""
+    with open(LOG_PATH, "a") as log:
+        log.write(f"\n===== {script} @ {datetime.now():%Y-%m-%d %H:%M:%S} =====\n")
+        log.flush()
+        # -u: unbuffered, so prints land in the log as they happen rather than
+        # in one block when the script exits
+        subprocess.run(["python", "-u", script], check=True, stdout=log, stderr=subprocess.STDOUT)
+
 # Generate KG
-subprocess.run(["python", "construct_kg.py"], check=True)
+run("construct_kg.py")
 
 # Generate Predictions
-subprocess.run(["python", "query_kg.py"], check=True)
-subprocess.run(["python", "query_llm.py"], check=True)
-subprocess.run(["python", "query_rag.py"], check=True)
-subprocess.run(["python", "query_causal_lit_kg.py"], check=True)
-subprocess.run(["python", "query_causal_lit_llm.py"], check=True)
-subprocess.run(["python", "query_causal_lit_rag.py"], check=True)
+run("query_kg.py")
+run("query_llm.py")
+run("query_rag.py")
+run("query_causal_lit_kg.py")
+run("query_causal_lit_llm.py")
+run("query_causal_lit_rag.py")
 
 # Combine all results
 kgrag = pd.read_csv("results/kgrag.csv", index_col=0).drop(columns=["Label"])
@@ -54,5 +70,5 @@ consolidated = pd.concat([kgrag, llm, rag], ignore_index=True)
 consolidated.to_csv("results/results_undirected_combined.csv")
 
 # Generate directed results
-subprocess.run(["python", "query_directions_without_proto.py"], check=True)
-subprocess.run(["python", "query_directions_with_proto.py"], check=True)
+run("query_directions_without_proto.py")
+run("query_directions_with_proto.py")
