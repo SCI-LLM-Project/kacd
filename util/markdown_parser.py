@@ -9,19 +9,10 @@ def read_markdown_file(file_path):
         content = file.read()
     return content
 
+# unused
 def remove_end_sections(content):
     """
-    Truncate everything from the start of the References section onward.
-
-    Deliberately narrower than matching every possible end-of-paper heading
-    (Funding, Acknowledgements, Author Contributions, Data Availability, ...):
-    those short administrative headings routinely appear in front matter too
-    (e.g. "Funding sources" / "Conflicts of interest" right under the author
-    block, before the abstract even starts), which caused truncation to fire
-    catastrophically early on some papers - one lost 98.9% of its content this
-    way. "References" doesn't have that failure mode - verified against the
-    real corpus that every paper where this matches early is a genuine, large
-    reference list, not a false positive.
+    Truncate everything from the start of the References section onward
     """
     references_patterns = [
         r'#+\s*References?\s*.*?$',          # # References
@@ -47,7 +38,7 @@ def process_markdown_paper(file_path):
     content = read_markdown_file(file_path)
 
     # Remove references section onward
-    content = remove_end_sections(content)
+    # content = remove_end_sections(content)
 
     return content.strip()
 
