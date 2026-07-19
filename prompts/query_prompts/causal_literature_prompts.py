@@ -29,7 +29,7 @@ class Answer(BaseModel):
 
         "\n --- REPORT STRUCTURE ---\n"
         "You will be given two separate reports from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:\n"
-        "Knowledge Graph Communities: Each community will consist of a title, a summary, and a list of key findings.\n"
+        "Knowledge Graph Communities: Each community will consist of a title, a summary, a list of key findings, and an impact rating with an explanation.\n"
         "Chunks: Segments of text from the original source documents.\n"
         "Knowledge Graph Relationships: Facts extracted from the original source documents and organized into a relationship as apart of the Knowledge Graph. "
         "Each Relationship included will follow a knowledge graph triplet structure:\n"

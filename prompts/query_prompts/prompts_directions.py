@@ -162,7 +162,7 @@ class Answer(BaseModel):
 
 --- REPORT STRUCTURE ---
 You will be given a report from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:
-Knowledge Graph Communities: Each community will consist of a title, a summary, and a list of key findings.
+Knowledge Graph Communities: Each community will consist of a title, a summary, a list of key findings, and an impact rating with an explanation.
 Chunks: Segments of text from the original source documents.
 Knowledge Graph Relationships: Facts extracted from the original source documents and organized into a relationship as apart of the Knowledge Graph.
 Each Relationship included will follow a knowledge graph triplet structure:
@@ -200,7 +200,7 @@ class Answer(BaseModel):
 
 --- REPORT STRUCTURE ---
 You will be given a report from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:
-Knowledge Graph Communities: Each community will consist of a title, a summary, and a list of key findings.
+Knowledge Graph Communities: Each community will consist of a title, a summary, a list of key findings, and an impact rating with an explanation.
 Chunks: Segments of text from the original source documents.
 Knowledge Graph Relationships: Facts extracted from the original source documents and organized into a relationship as apart of the Knowledge Graph.
 Each Relationship included will follow a knowledge graph triplet structure:
@@ -238,7 +238,7 @@ class Answer(BaseModel):
 
 --- REPORT STRUCTURE ---
 You will be given a report from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:
-Knowledge Graph Communities: Each community will consist of a title, a summary, and a list of key findings.
+Knowledge Graph Communities: Each community will consist of a title, a summary, a list of key findings, and an impact rating with an explanation.
 Chunks: Segments of text from the original source documents.
 Knowledge Graph Relationships: Facts extracted from the original source documents and organized into a relationship as apart of the Knowledge Graph.
 Each Relationship included will follow a knowledge graph triplet structure:
@@ -274,7 +274,7 @@ class Answer(BaseModel):
 
 --- REPORT STRUCTURE ---
 You will be given a report from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:
-Knowledge Graph Communities: Each community will consist of a title, a summary, and a list of key findings.
+Knowledge Graph Communities: Each community will consist of a title, a summary, a list of key findings, and an impact rating with an explanation.
 Chunks: Segments of text from the original source documents.
 Knowledge Graph Relationships: Facts extracted from the original source documents and organized into a relationship as apart of the Knowledge Graph.
 Each Relationship included will follow a knowledge graph triplet structure:

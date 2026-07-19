@@ -303,7 +303,7 @@ def stringify_report(report):
     string += "### " + report["title"] + "\n"
     string += "### Summary\n" + report["summary"] + "\n"
     string += "### Key Findings\n" + "\n".join(report["detailed_findings"]) + "\n"
-    # string += f"## Impact Rating: {report['impact_severity_rating']}\n" + report['rating_explanation']
+    string += "### Impact Rating: " + str(report["impact_severity_rating"]) + "\n" + report["rating_explanation"] + "\n"
 
     return string
 
