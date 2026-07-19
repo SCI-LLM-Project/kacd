@@ -223,34 +223,3 @@ columns = "Var1", "Var2", "Causal Literature",  "Causal Literature Reasoning", "
 local_res = pd.DataFrame(res.to_list(), columns=columns)
 local_res.to_csv("results/kg+rag_full_causal_literature.csv")
 local_res
-
-# %% [markdown]
-# # Saving the Prompts
-
-# %%
-import json
-
-# variables of interest
-with open("variable_definitions/default_definitions.json", "r") as file:
-    def_map = json.load(file)
-
-# %%
-from prompts.query_prompts.metric_prompts import causal_lit_prompt
-var1 = "Sex"
-var2 = "Anxiety"
-
-clquery = causal_lit_prompt(var1, var2)
-
-# %%
-from prompts.query_prompts.causal_literature_prompts import query_kg_causal_lit_prompt, query_llm_causal_lit_prompt, query_rag_causal_lit_prompt
-
-with open("raw_prompts/kg+rag_causal_literature_prompt.txt", "w") as f:
-    print(query_kg_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
-
-with open("raw_prompts/llm+rag_causal_literature_prompt.txt", "w") as f:
-    print(query_rag_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
-
-with open("raw_prompts/llm_prompt_causal_literature.txt", "w") as f:
-    print(query_llm_causal_lit_prompt(clquery, var1, var2, def_map), file=f)
-
-
