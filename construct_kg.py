@@ -63,7 +63,6 @@ len(chunks)
 from typing import List
 from langchain_community.graphs.graph_document import GraphDocument
 from langchain_core.documents import Document
-from retry import retry
 from tqdm import tqdm
 from models.KnowledgeGraphSchema import KnowledgeGraph
 from prompts.construction_prompts.extraction_prompts import graph_extraction_prompt
@@ -100,7 +99,6 @@ from graphdatascience import GraphDataScience
 
 from prompts.construction_prompts.extraction_prompts import entity_resolution_prompt
 from typing import List, Optional
-from retry import retry
 
 # %%
 pubmedbert_embeddings = HuggingFaceEmbeddings(
@@ -189,7 +187,7 @@ from models.DisambiguateSchema import Disambiguate
 
 extraction_llm = get_client(schema=Disambiguate)
 
-@retry(tries=1, delay=2)
+# no retry decorator: APIClient.__call__ already retries once internally
 def entity_resolution(entities: List[str]) -> Optional[List[str]]:
     res = extraction_llm(entity_resolution_prompt(sorted(entities)))
     return [
