@@ -103,7 +103,6 @@ from langchain_community.embeddings import OllamaEmbeddings, HuggingFaceEmbeddin
 from graphdatascience import GraphDataScience
 
 from prompts.construction_prompts.extraction_prompts import entity_resolution_prompt
-from pydantic import BaseModel, create_model, Field
 from typing import List, Optional
 from retry import retry
 
@@ -190,17 +189,7 @@ potential_duplicate_candidates = graph.query(edit_distance_query, params={'dista
 # %%
 from prompts.construction_prompts.extraction_prompts import entity_resolution_prompt
 from llm.factory import get_client
-
-class DuplicateEntities(BaseModel):
-    entities: List[str] = Field(
-        description="Entities that represent the same object or real-world entity and should be merged"
-    )
-
-
-class Disambiguate(BaseModel):
-    merge_entities: Optional[List[DuplicateEntities]] = Field(
-        description="Lists of entities that represent the same object or real-world entity and should be merged"
-    )
+from models.DisambiguateSchema import Disambiguate
 
 extraction_llm = get_client(schema=Disambiguate)
 
