@@ -16,6 +16,7 @@ def get_client(schema=None):
             model=config.LLM_MODEL,
             api_key=api_key,
             max_workers=config.LLM_MAX_WORKERS,
+            max_tokens=config.LLM_MAX_TOKENS,
         )
 
     raise ValueError(f"Unknown LLM_BACKEND: {config.LLM_BACKEND!r}")

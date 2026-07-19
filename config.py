@@ -27,6 +27,12 @@ topEntities = 20
 LLM_BACKEND = "together"
 LLM_MODEL = "damonlin93410-8d4a/mistral-7b-instruct"
 LLM_MAX_WORKERS = 32
+# Max tokens the model is allowed to generate per response (output only - has
+# no bearing on prompt/input size). Applied system-wide via get_client(); every
+# call site already relied on this same value as APIClient's own default, this
+# just makes it an explicit, centrally-configured setting instead of an
+# implicit one.
+LLM_MAX_TOKENS = 10000
 
 # Tokenizer used for approximate token-count budgeting (context-window packing in
 # build_context.py - query_context_window, community summarization, etc). Kept
