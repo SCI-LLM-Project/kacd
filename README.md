@@ -22,6 +22,7 @@ For a runnable, end-to-end example of the whole pipeline (KG construction -> pre
 # Together AI Deployment Configuration
 - mistral-7b-instruct-v0.3
 - min 3 replicas max 3 replicas
+- will create graph and all queries in approximately 5 hrs for 75 dollars
 
 # how to dump a database
 
