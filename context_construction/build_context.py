@@ -355,6 +355,7 @@ def stringify_report(report):
     string += "### " + report["title"] + "\n"
     string += "### Summary\n" + report["summary"] + "\n"
     string += "### Key Findings\n" + "\n".join(report["detailed_findings"]) + "\n"
+    # if you want to exclude this, comment it out
     string += "### Impact Rating: " + str(report["impact_severity_rating"]) + "\n" + report["rating_explanation"] + "\n"
 
     return string
