@@ -1,5 +1,13 @@
 # kg_aug_causal_disc_exp
 
+# Environment
+
+To reproduce the experiments in this repository, the following are required:
+- a python virtual env using `requirements.txt`
+- a docker container running neo4j (run `docker compose up -d` to have it run in the backgrounmd, and run `docker compose down` to shut it off)
+- an API key stored in .env from `Together AI`.
+- for each experiment run, please configure `config.py` with your needed environment variables.
+
 # Instructions for use
 
 This repository contains code for creating a Knowledge Graph using structured output from LLMs. 
