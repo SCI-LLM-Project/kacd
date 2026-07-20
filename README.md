@@ -51,3 +51,5 @@ docker exec neo4j-kg neo4j start
 - all dumps are saved to /mnt/danderson/neo4j/dumps
 - /mnt/danderson/neo4j/dumps/full_corpus.dump is a dump of a KG that used all papers in the most up to date version of Conor's decision log (as of dec 3 2025)
 - /mnt/danderson/neo4j/dumps/december2.dump is missing 5 papers and contains 1 extra papers
+- /mnt/danderson/neo4j/dumps/neo4j_vllm.dump is a copy of the full_corpus.dump
+- /mnt/danderson/neo4j/dumps/neo4j_api.dump is a copy of the kg buult with the api
