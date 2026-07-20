@@ -7,13 +7,15 @@
 #
 # Hyperparameters swept (baseline = current config.py values):
 #   top_entities    - k for the vector similarity search (config.topEntities)
-#   top_chunks      - max document chunks from local_search.cypher (config.topChunks)
-#   top_communities - max community reports (config.topCommunities)
-#   top_rels        - max KG relationships (config.topRels)
 #   chunk_frac      - share of the token budget reserved for chunks (hardcoded 0.5
 #                     in construct_query_context)
 #   report_frac     - share reserved for community reports; relationships get the
 #                     leftovers (hardcoded 0.4)
+#
+# The retrieval caps (topChunks/topCommunities/topRels, 50 each) are NOT swept:
+# the 8000-token budget is the binding constraint, so the packed context stops
+# well before 50 items of anything - per config.py's own comment, the caps only
+# exist so the window always fills. They stay at their config values.
 #
 # The total token budget for the packed report is held fixed at 8000 tokens
 # (config.query_context_window) - only the caps and the split of that budget are
@@ -99,15 +101,12 @@ BASELINE = dict(
 # hyperparameter changed. chunk_frac + report_frac must stay <= 1.0 against the
 # baseline value of the other fraction (0.5/0.4), hence the 0.6/0.5 caps.
 GRID = {
-    "top_entities": [5, 10, 20, 40],
-    "top_chunks": [5, 15, 50],
-    "top_communities": [5, 15, 50],
-    "top_rels": [10, 25, 50],
     "chunk_frac": [0.3, 0.5, 0.6],
     "report_frac": [0.2, 0.4, 0.5],
+    "top_entities": [5, 10, 20, 40],
 }
 
-RETRIEVAL_CAP = 50  # must be >= the largest top_chunks/top_communities/top_rels swept
+RETRIEVAL_CAP = 50  # what the cypher is asked for; the baseline caps then slice it
 
 METRICS = {
     "Plausibility": plausibility_prompt,
@@ -316,9 +315,6 @@ def full_grid_configs(grid, baseline):
 
 configs = one_factor_configs(GRID, BASELINE)
 
-for cap_name in ("top_chunks", "top_communities", "top_rels"):
-    assert max(GRID[cap_name]) <= RETRIEVAL_CAP, f"raise RETRIEVAL_CAP to sweep {cap_name} above {RETRIEVAL_CAP}"
-
 upper_bound = len(configs) * len(pairs) * len(ACTIVE_METRICS)
 print(f"{len(configs)} configs -> at most {upper_bound} LLM calls (cache hits are free)")
 
@@ -366,7 +362,7 @@ MUTED = "#767676"
 baseline_score = results.loc[results["varied"] == "baseline", score_col].iloc[0]
 params_to_plot = [name for name in GRID if (results["varied"] == name).any()]
 
-fig, axes = plt.subplots(2, 3, figsize=(12, 6), sharey=True)
+fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
 for ax, name in zip(axes.flat, params_to_plot):
     # the baseline row supplies the point at the baseline value of this parameter
     sub = results[results["varied"].isin([name, "baseline"])].sort_values(name)
@@ -378,8 +374,7 @@ for ax, name in zip(axes.flat, params_to_plot):
         ax.spines[spine].set_visible(False)
 for ax in axes.flat[len(params_to_plot):]:
     ax.axis("off")
-for ax in axes[:, 0]:
-    ax.set_ylabel(score_col)
+axes[0].set_ylabel(score_col)
 fig.suptitle(f"{score_col} vs each hyperparameter (dashed = baseline)", y=1.02)
 fig.tight_layout()
 PLOT_PATH = SWEEP_DIR / f"sweep_{run_stamp}.png"
@@ -408,8 +403,7 @@ def inspect_context(p=None, pair_index=0, metric=None, max_chars=4000):
 #
 # Once a configuration holds up on the full 145 pairs (SAMPLE_N = None), wire it
 # into the pipeline:
-#   - top_entities, top_chunks, top_communities, top_rels ->
-#     topEntities, topChunks, topCommunities, topRels in config.py
+#   - top_entities -> topEntities in config.py
 #   - chunk_frac / report_frac -> the two hardcoded fractions in
 #     construct_query_context (context_construction/build_context.py)
 # then re-run query_kg.py (ideally under a new RUN_NAME) to regenerate kgrag.csv.
