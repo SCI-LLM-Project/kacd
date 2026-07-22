@@ -28,6 +28,7 @@ NEO4J_DATABASE = "neo4j"
 DIRECTORY = "../clbp_causal_md"
 
 query_context_window = 8000
+# We chose these parameters empirically picking numbers high enough that the KG-RAG context will always be close to 8000
 # topChunks, topCommunities, topRels is large so that we never not fill out the context window under any circumstance.
 # doesn't affect performance because we already have filtering in place / limits on the context window.
 topChunks = 50
