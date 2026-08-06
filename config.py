@@ -11,7 +11,7 @@ RESULTS_ROOT = PROJECT_ROOT / "results"
 # name of the execution run. Everything the pipeline generates lands in
 # results/<RUN_NAME>/, so changing this before a run (different model, prompt
 # edits, a rebuilt KG) keeps runs side by side instead of overwriting.
-RUN_NAME = "mistral"
+RUN_NAME = "llama"
 RESULT_DIR = RESULTS_ROOT / RUN_NAME
 # tracked pipeline inputs (proto edges are external and never regenerated here)
 DATA_DIR = PROJECT_ROOT / "data"
@@ -21,11 +21,11 @@ PROTO_DIR = DATA_DIR / "proto"
 with open(PROJECT_ROOT / "variable_definitions/default_definitions.json", "r") as file:
     def_map = json.load(file)
 
-NEO4J_URI = "bolt://localhost:7688"
+NEO4J_URI = "bolt://localhost:7687"
 NEO4J_USERNAME = "neo4j"
 NEO4J_PASSWORD = "password"
 NEO4J_DATABASE = "neo4j"
-DIRECTORY = "../clbp_causal_md"
+DIRECTORY = "../clbp_causal_md_24jul26"
 
 query_context_window = 8000
 # We chose these parameters empirically picking numbers high enough that the KG-RAG context will always be close to 8000
@@ -41,7 +41,8 @@ topEntities = 20
 # "meta-llama/Llama-3.3-70B-Instruct-Turbo", or a fine-tuned model's dedicated
 # endpoint name). API key is not stored here - see .env / LLM_API_KEY.
 LLM_BACKEND = "together"
-LLM_MODEL = "damonlin93410-8d4a/mistral-7b-instruct"
+#LLM_MODEL = "atpspin-11c4/mistral-7b-instruct"
+LLM_MODEL = "atpspin-11c4/llama3.1_8B"
 LLM_MAX_WORKERS = 24
 # Max tokens the model is allowed to generate per response (output only - has
 # no bearing on prompt/input size). Applied system-wide via get_client(); every

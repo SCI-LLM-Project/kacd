@@ -203,6 +203,87 @@ merged_entities = []
 for el in tqdm(potential_duplicate_candidates, total=len(potential_duplicate_candidates), desc="Resolving entities"):
     merged_entities.extend(entity_resolution(el["combinedResult"]))
 
+## here is where we fix the merged entities
+
+from collections.abc import Iterable
+
+
+def consolidate_merge_groups(
+    groups: Iterable[Iterable[str]],
+) -> list[list[str]]:
+    """
+    Combine all transitively overlapping groups and remove duplicates.
+
+    Examples:
+        [A, B], [B, C] -> [A, B, C]
+        [A, A]         -> removed
+    """
+    parent: dict[str, str] = {}
+    rank: dict[str, int] = {}
+    first_seen: dict[str, int] = {}
+    sequence = 0
+
+    def find(item: str) -> str:
+        if parent[item] != item:
+            parent[item] = find(parent[item])
+        return parent[item]
+
+    def add(item: str) -> None:
+        nonlocal sequence
+
+        if item not in parent:
+            parent[item] = item
+            rank[item] = 0
+            first_seen[item] = sequence
+            sequence += 1
+
+    def union(left: str, right: str) -> None:
+        left_root = find(left)
+        right_root = find(right)
+
+        if left_root == right_root:
+            return
+
+        if rank[left_root] < rank[right_root]:
+            left_root, right_root = right_root, left_root
+
+        parent[right_root] = left_root
+
+        if rank[left_root] == rank[right_root]:
+            rank[left_root] += 1
+
+    for raw_group in groups:
+        # Remove repeated IDs while preserving order.
+        group = list(dict.fromkeys(raw_group))
+
+        if not group:
+            continue
+
+        for entity_id in group:
+            add(entity_id)
+
+        for entity_id in group[1:]:
+            union(group[0], entity_id)
+
+    components: dict[str, list[str]] = {}
+
+    for entity_id in parent:
+        root = find(entity_id)
+        components.setdefault(root, []).append(entity_id)
+
+    cleaned = []
+
+    for component in components.values():
+        component.sort(key=first_seen.__getitem__)
+
+        # A one-element component requires no merge.
+        if len(component) > 1:
+            cleaned.append(component)
+
+    return cleaned
+
+merged_entities = consolidate_merge_groups(merged_entities)
+
 # %%
 graph.query("""
 UNWIND $data AS candidates

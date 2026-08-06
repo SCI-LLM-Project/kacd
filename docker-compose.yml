@@ -5,8 +5,8 @@ services:
     image: neo4j:5.15.0
     container_name: neo4j-kgv2
     ports:
-      - "7475:7474"  # HTTP  (host 7475 -> Neo4j's real internal HTTP port 7474)
-      - "7688:7687"  # Bolt  (host 7688 -> Neo4j's real internal Bolt port 7687)
+      - "7474:7474"  # HTTP  (host 7475 -> Neo4j's real internal HTTP port 7474)
+      - "7687:7687"  # Bolt  (host 7688 -> Neo4j's real internal Bolt port 7687)
     environment:
       - NEO4J_AUTH=neo4j/password
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]

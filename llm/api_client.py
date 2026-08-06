@@ -19,11 +19,12 @@ class APIClient:
         max_retries: int = 2,
         max_workers: int = 8,
         max_tokens: int = 10000,
+        timeout: int = 1800
     ) -> None:
         self.schema = schema
         self.model = model
         # api_key=None falls back to the TOGETHER_API_KEY env var, same as the SDK's own default
-        self.client = Together(api_key=api_key, max_retries=max_retries)
+        self.client = Together(api_key=api_key, max_retries=max_retries, timeout=timeout)
         self.max_workers = max_workers
         # an arbitrarily large cap, not a target. without this, a truncated response
         # fails model_validate_json and burns a full retry round-trip for something
