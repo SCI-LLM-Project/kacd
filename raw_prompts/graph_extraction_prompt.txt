@@ -1,0 +1,121 @@
+[system]
+You are an expert in chronic lower back pain.
+
+[user]
+
+    -Goal-
+    Given a text document that is potentially relevant to this activity, identify all entities from the text and all relationships among the identified entities.
+    Format your output following this pydantic schema:
+    class KnowledgeGraph(BaseModel):
+        nodes: Optional[List[SimpleNode]] = Field(
+            ...,
+            description='List of nodes',
+            title='Nodes'
+        )
+        relationships: Optional[List[SimpleRelationship]] = Field(
+            ...,
+            description='List of relationships',
+            title='Relationships'
+        )
+
+    -Steps-
+    1. Identify all entities. For each identified entity, extract the following information:
+    - entity_name: Name of the entity, capitalized
+    - entity_type: Type of the entity, capitalized
+    - entity_description: Comprehensive description of the entity's attributes and activities
+
+    Specifically, focus on extracting entities pertaining to the following terms:
+    - Sex: either of the two main categories (male and female) into which humans and most other living things are divided on the basis of their reproductive functions.
+    - PEG score: A index measuring pain interference and pain intensity due to chronic low back pain
+    - Sleep disturbance: assess self-reported perceptions of sleep quality, sleep depth, and restoration associated with sleep. The score is a summary score on the general perception of sleep quality
+    - PROMIS depression: affective and cognitive manifestations of depression
+    - PROMIS anxiety: focuses on fear (e.g., worry, feelings of panic), anxious misery (e.g., dread), hyperarousal (e.g., tension, nervousness, restlessness), and somatic symptoms related to arousal (e.g., cardiovascular symptoms, dizziness).
+    - BMI or obesity or being overweight. This should perhaps be described as weight or BMI associations
+    - Alcohol: alcohol consumption (number of drinks per week)
+    - Fear avoidance: patient reported questionnaire which specifically focuses on how a patient's fear avoidance beliefs about physical activity and work may affect and contribute to their low back pain and resulting disability
+    - Pain catastrophizing score: Pain catastrophizing is characterized by the tendency to magnify the threat value of a pain stimulus and to feel helpless in the presence of pain, as well as by a relative inability to prevent or inhibit pain-related thoughts in anticipation of, during, or following a painful event
+    - Education: The level of education of the participant
+    - Financial Level: level of financial situation of the participant. Often a proxy for socioeconomic status
+    - Age: The age of the patient
+    - Smoking: the action or habit of inhaling and exhaling the smoke of tobacco by sucking on the end of a lit cigarette, cigar, pipe, etc.
+    - CCI: A comorbidity index. It measures the number of comorbidities
+
+    Format each entity following this pydantic schema:
+    class SimpleNode(BaseModel):
+        id: str = Field(
+            ...,
+            description='Name of the entity, capitalized',
+            title='Id',
+            min_length=1
+        )
+        type: str = Field(
+            ...,
+            description='Type of the entity, capitalized',
+            title='Type',
+            min_length=1
+        )
+        description: str = Field(
+            ...,
+            description="Comprehensive description of the entity's attributes and activities",
+            title='Description',
+            min_length=1
+        )
+    
+    2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.
+    For each pair of related entities, extract the following information:
+    - source_entity: name of the source entity, as identified in step 1
+    - target_entity: name of the target entity, as identified in step 1
+    - relationship_description: explanation as to why you think the source entity and the target entity are related to each other
+    - relationship_strength: a numeric score indicating strength of the relationship between the source entity and target entity
+    - relationship_type: name of the relationship
+    
+    Format each relationship following this pydantic schema:
+    class SimpleRelationship(BaseModel):
+        source_node_id: str = Field(
+            ...,
+            description='name of the source entity',
+            title='Source Node Id',
+            min_length=1
+        )
+        source_node_type: str = Field(
+            ...,
+            description="type of the source entity",
+            title='Source Node Type',
+            min_length=1
+        )
+        target_node_id: str = Field(
+            ...,
+            description='name of the target entity',
+            title='Target Node Id',
+            min_length=1
+        )
+        target_node_type: str = Field(
+            ...,
+            description="type of the target entity",
+            title='Target Node Type',
+            min_length=1
+        )
+        type: str = Field(
+            ...,
+            description="name of the relationship",
+            title='Type',
+            min_length=1
+        )
+        strength: int = Field(
+            ...,
+            description="a numeric score indicating strength of the relationship between the source entity and target entity",
+            title='Strength'
+        )
+        description: str = Field(
+            ...,
+            description='explanation as to why you think the source entity and the target entity are related to each other',
+            title='Description',
+            min_length=1
+        )
+    
+    -Real Data-
+    ######################
+    Text: Sleep disturbance was significantly associated with increased pain catastrophizing in patients with chronic low back pain (CLBP). Participants reporting poor sleep quality also demonstrated higher levels of fear-avoidance behavior, suggesting a bidirectional relationship between sleep and psychological factors in chronic pain populations.
+    ######################
+    Output:
+

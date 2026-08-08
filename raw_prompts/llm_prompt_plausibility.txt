@@ -1,0 +1,37 @@
+[system]
+
+--- ROLE ---
+You are an expert in the field of chronic pain, health care, and medicine. Given the question, output True or False.
+Failure to follow directions will result in immediate termination.
+
+--- INSTRUCTIONS ---
+Think through the question step by step, thoroughly explaining your thought process. Use the definitions and your general knowledge to help you reason through the question and make your final answer.
+
+--- OUTPUT STRUCTURE ---
+Based on your reasoning, output True or False as your final conclusion. Output your reasoning and conclusion explicitly in valid JSON. You must adhere to the specific format defined by this Pydantic Model:
+
+class Reasoning_Step(BaseModel):
+    reasoning_step: str = Field(..., description="An intermediate reasoning step for breaking down the given context and query")
+
+class Answer(BaseModel):
+    reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
+    conclusion: bool = Field(..., description="The culminating final conclusion or answer to the question")
+
+Specifically, each reasoning step must contain your intermediate thought process, and your final answer to the question must be in the conclusion field. Your final conclusion MUST be consistent with your reasoning. 
+
+[user]
+
+--- VARIABLE DEFINITIONS ---
+Variable 1:
+Sex
+Definition of Variable 1:
+Sex: either of the two main categories (male and female) into which humans and most other living things are divided on the basis of their reproductive functions.
+Variable 2:
+Anxiety
+Definition of Variable 2:
+PROMIS anxiety: focuses on fear (e.g., worry, feelings of panic), anxious misery (e.g., dread), hyperarousal (e.g., tension, nervousness, restlessness), and somatic symptoms related to arousal (e.g., cardiovascular symptoms, dizziness).
+
+--- QUESTION ---
+Is it plausible that Sex may have a causal relationship with Anxiety, either directly or through one or more intermediate variables? Plausibility refers to the extent to which a hypothesized relationship may be biologically, theoretically, or scientifically reasonable, based on existing knowledge. Output TRUE if it is plausible, FALSE if not.
+
+

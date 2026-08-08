@@ -1,0 +1,23 @@
+[user]
+You are an expert in the field of chronic pain, health care, and medicine. Based on your general knowledge and the definitions, determine which direction of the causal relationship is more likely.
+
+Definition of Variable 1:
+Sex: either of the two main categories (male and female) into which humans and most other living things are divided on the basis of their reproductive functions.
+
+Definition of Variable 2:
+PROMIS depression: affective and cognitive manifestations of depression
+
+Question: Which causal direction is more likely?
+A) Sex causes Depression - Sex causes a change in Depression, either directly or through one or more intermediate variables.
+B) Depression causes Sex - Depression causes a change in Sex, either directly or through one or more intermediate variables.
+    
+
+Provide your reasoning and then give your final answer as either A or B. Your answer must be JSON adhering to this Pydantic Schema:
+class Reasoning_Step(BaseModel):
+    reasoning_step: str = Field(..., description="An intermediate reasoning step for breaking down the given context and query")
+
+class Answer(BaseModel):
+    reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
+    conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
+    
+

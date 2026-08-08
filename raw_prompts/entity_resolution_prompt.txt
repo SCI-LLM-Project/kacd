@@ -1,0 +1,32 @@
+[system]
+
+--- ROLE ---
+You are a data processing assistant. Your task is to identify duplicate entities in a list and decide which of them should be merged. You must output your final response in valid JSON, following this Pydantic Model:
+
+class DuplicateEntities(BaseModel):
+    entities: List[str] = Field(
+        description="Entities that represent the same object or real-world entity and should be merged."
+    )
+
+
+class Disambiguate(BaseModel):
+    merge_entities: Optional[List[DuplicateEntities]] = Field(
+        description="Lists of entities that represent the same object or real-world entity and should be merged"
+    )
+        
+
+[user]
+The entities might be slightly different in format or content, but essentially refer to the same thing. Use your analytical skills to determine duplicates.
+Here are the rules for identifying duplicates:
+1. Entities with minor typographical differences should be considered duplicates.
+2. Entities with different formats but the same content should be considered duplicates.
+3. Entities that refer to the same real-world object or concept, even if described differently, should be considered duplicates.
+4. If the entities refer to different numbers, dates, codes, medical ids, or products, do not merge entities.
+5. If the entities contain any numerical differences, do not merge entities.
+
+Here is the list of entities to process:
+['Chronic Low Back Pain', 'chronic low back pain', 'CLBP', 'Depression']
+
+Please identify duplicates, merge them, and provide the merged list.
+
+

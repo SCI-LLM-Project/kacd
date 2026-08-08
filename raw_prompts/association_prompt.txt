@@ -1,0 +1,1 @@
+Association refers to any statistical dependency between two variables, regardless of strength or directionality. That is, if knowledge of the value of one variable gives information about the other, they are said to be associated. Is there an association between Sex and Anxiety? Output True if there exists a statistical association between the two variables, False, if not.

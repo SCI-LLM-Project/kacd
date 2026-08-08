@@ -1,0 +1,34 @@
+[user]
+You are an expert in the field of chronic pain, health care, and medicine. Based on your general knowledge, the following report, and the definitions, determine which temporal causal relationship is more likely, either directly or through one or more intermediate variables.
+
+Report:
+
+
+Definition of Variable 1:
+Sex: either of the two main categories (male and female) into which humans and most other living things are divided on the basis of their reproductive functions.
+
+Definition of Variable 2:
+PROMIS depression: affective and cognitive manifestations of depression
+
+Question: Which temporal causal relationship is more likely?
+A) Sex precedes Depression - Sex occurs or changes before Depression in time
+B) Depression precedes Sex - Depression occurs or changes before Sex in time
+
+Provide your reasoning and then give your final answer as either A or B. Your answer must be JSON adhering to this Pydantic Schema:
+class Reasoning_Step(BaseModel):
+    reasoning_step: str = Field(..., description="An intermediate reasoning step for breaking down the given context and query")
+
+class Answer(BaseModel):
+    reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
+    conclusion: Literal['A', 'B'] = Field(..., description="The culminating final conclusion or answer to the question")
+
+--- REPORT STRUCTURE ---
+You will be given a report from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:
+Knowledge Graph Communities: Each community will consist of a title, a summary, a list of key findings, and an impact rating with an explanation.
+Chunks: Segments of text from the original source documents.
+Knowledge Graph Relationships: Facts extracted from the original source documents and organized into a relationship as apart of the Knowledge Graph.
+Each Relationship included will follow a knowledge graph triplet structure:
+('entity id': 'entity description')--['relationship type': 'relationship description']-->('entity id': 'entity description')
+Note that the reports will be given in markdown format.
+    
+

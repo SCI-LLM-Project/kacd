@@ -31,6 +31,10 @@ from prompts.query_prompts.prompts_directions import (
     create_association_prompt_kg,
     create_temporality_prompt_kg,
     create_causal_prompt_kg,
+    create_plausibility_prompt_rag,
+    create_association_prompt_rag,
+    create_temporality_prompt_rag,
+    create_causal_prompt_rag,
     create_plausibility_prompt_llm,
     create_association_prompt_llm,
     create_temporality_prompt_llm,
@@ -45,43 +49,60 @@ from prompts.construction_prompts.extraction_prompts import (
 os.makedirs("raw_prompts", exist_ok=True)
 
 
+def render(prompt, file=None):
+    """Print a prompt as the model would receive it, one section per message.
+
+    The query/construction prompt builders return a messages list; the metric
+    prompts return a plain question string. Printing a messages list directly
+    gives you its repr - one line, with every newline escaped - so unpack it
+    here instead of reading \\n by eye.
+    """
+    if isinstance(prompt, str):
+        print(prompt, file=file)
+        return
+    for message in prompt:
+        print(f"[{message['role']}]", file=file)
+        print(message["content"], file=file)
+        print(file=file)
+
+
 def preview_metric_and_base_prompts():
     """Was query_kg.py's tail: metric question text + kg/rag/llm answer-generation prompts."""
     var1, var2 = "Sex", "Anxiety"
 
     with open("raw_prompts/plausibility_prompt.txt", "w") as f:
-        print(plausibility_prompt(var1, var2), file=f)
+        render(plausibility_prompt(var1, var2), file=f)
     with open("raw_prompts/temporality_prompt.txt", "w") as f:
-        print(temporality_prompt(var1, var2), file=f)
+        render(temporality_prompt(var1, var2), file=f)
     with open("raw_prompts/causal_lit_prompt.txt", "w") as f:
-        print(causal_lit_prompt(var1, var2), file=f)
+        render(causal_lit_prompt(var1, var2), file=f)
     with open("raw_prompts/association_prompt.txt", "w") as f:
-        print(association_prompt(var1, var2), file=f)
+        render(association_prompt(var1, var2), file=f)
 
     pquery = plausibility_prompt(var1, var2)
     aquery = association_prompt(var1, var2)
     tquery = temporality_prompt(var1, var2)
 
     with open("raw_prompts/kg+llm_prompt_plausibility.txt", "w") as f:
-        print(query_kg_prompt(pquery, var1, var2, "", def_map), file=f)
+        render(query_kg_prompt(pquery, var1, var2, "", def_map), file=f)
     with open("raw_prompts/kg+llm_prompt_association.txt", "w") as f:
-        print(query_kg_prompt(aquery, var1, var2, "", def_map), file=f)
+        render(query_kg_prompt(aquery, var1, var2, "", def_map), file=f)
     with open("raw_prompts/kg+llm_prompt_temporality.txt", "w") as f:
-        print(query_kg_prompt(tquery, var1, var2, "", def_map), file=f)
+        render(query_kg_prompt(tquery, var1, var2, "", def_map), file=f)
 
     with open("raw_prompts/llm+rag_prompt_plausibility.txt", "w") as f:
-        print(query_rag_prompt(pquery, var1, var2, "", def_map), file=f)
+        render(query_rag_prompt(pquery, var1, var2, "", def_map), file=f)
     with open("raw_prompts/llm+rag_prompt_association.txt", "w") as f:
-        print(query_rag_prompt(aquery, var1, var2, "", def_map), file=f)
+        render(query_rag_prompt(aquery, var1, var2, "", def_map), file=f)
     with open("raw_prompts/llm+rag_prompt_temporality.txt", "w") as f:
-        print(query_rag_prompt(tquery, var1, var2, "", def_map), file=f)
+        render(query_rag_prompt(tquery, var1, var2, "", def_map), file=f)
 
     with open("raw_prompts/llm_prompt_plausibility.txt", "w") as f:
-        print(query_llm_prompt(pquery, var1, var2, def_map), file=f)
+        render(query_llm_prompt(pquery, var1, var2, def_map), file=f)
     with open("raw_prompts/llm_prompt_association.txt", "w") as f:
-        print(query_llm_prompt(aquery, var1, var2, def_map), file=f)
+        render(query_llm_prompt(aquery, var1, var2, def_map), file=f)
     with open("raw_prompts/llm_prompt_temporality.txt", "w") as f:
-        print(query_llm_prompt(tquery, var1, var2, def_map), file=f)
+        render(query_llm_prompt(tquery, var1, var2, def_map), file=f)
 
 
 def preview_causal_literature_prompts():
@@ -90,45 +111,74 @@ def preview_causal_literature_prompts():
     clquery = causal_lit_prompt(var1, var2)
 
     with open("raw_prompts/kg+rag_causal_literature_prompt.txt", "w") as f:
-        print(query_kg_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
+        render(query_kg_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
     with open("raw_prompts/llm+rag_causal_literature_prompt.txt", "w") as f:
-        print(query_rag_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
+        render(query_rag_causal_lit_prompt(clquery, var1, var2, "", def_map), file=f)
     with open("raw_prompts/llm_prompt_causal_literature.txt", "w") as f:
-        print(query_llm_causal_lit_prompt(clquery, var1, var2, def_map), file=f)
+        render(query_llm_causal_lit_prompt(clquery, var1, var2, def_map), file=f)
 
 
 def preview_direction_prompts():
-    """Was query_directions_without_proto.py's tail: prints (doesn't save) the direction-
-    resolution prompts for the KG/RAG and LLM-only contexts."""
+    """Was query_directions_without_proto.py's tail: the direction-resolution prompts
+    for the KG/RAG and LLM-only contexts."""
     test_var1, test_var2 = "Sex", "Depression"
-    test_report = """
-A recent study examined the relationship between biological sex and depression prevalence.
-The study found that females have approximately 2x higher rates of major depressive disorder
-compared to males across multiple age groups. This difference appears after puberty and persists
-throughout adulthood. Hormonal factors, particularly estrogen and progesterone fluctuations,
-have been implicated in this sex difference. Additionally, psychosocial factors such as
-differential stress exposure and coping mechanisms may contribute to these differences.
-"""
+    test_report = ""
 
     print("=" * 80)
-    print("TESTING PROMPTS WITH REPORT (KG/RAG contexts)")
+    print("TESTING PROMPTS WITH REPORT (KG-RAG context)")
     print("=" * 80)
 
     print("\n1. PLAUSIBILITY PROMPT:")
     print("-" * 80)
-    print(create_plausibility_prompt_kg(test_var1, test_var2, test_report))
+    render(create_plausibility_prompt_kg(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_plausibility_kg.txt", "w") as f:
+        render(create_plausibility_prompt_kg(test_var1, test_var2, test_report), file=f)
 
     print("\n\n2. ASSOCIATION PROMPT:")
     print("-" * 80)
-    print(create_association_prompt_kg(test_var1, test_var2, test_report))
+    render(create_association_prompt_kg(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_association_kg.txt", "w") as f:
+        render(create_association_prompt_kg(test_var1, test_var2, test_report), file=f)
 
     print("\n\n3. TEMPORALITY PROMPT:")
     print("-" * 80)
-    print(create_temporality_prompt_kg(test_var1, test_var2, test_report))
+    render(create_temporality_prompt_kg(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_temporality_kg.txt", "w") as f:
+        render(create_temporality_prompt_kg(test_var1, test_var2, test_report), file=f)
 
     print("\n\n4. CAUSAL LITERATURE PROMPT:")
     print("-" * 80)
-    print(create_causal_prompt_kg(test_var1, test_var2, test_report))
+    render(create_causal_prompt_kg(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_causal_kg.txt", "w") as f:
+        render(create_causal_prompt_kg(test_var1, test_var2, test_report), file=f)
+
+    print("\n" + "=" * 80)
+    print("TESTING PROMPTS WITH REPORT (RAG context)")
+    print("=" * 80)
+
+    print("\n1. PLAUSIBILITY PROMPT (RAG):")
+    print("-" * 80)
+    render(create_plausibility_prompt_rag(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_plausibility_rag.txt", "w") as f:
+        render(create_plausibility_prompt_rag(test_var1, test_var2, test_report), file=f)
+
+    print("\n\n2. ASSOCIATION PROMPT (RAG):")
+    print("-" * 80)
+    render(create_association_prompt_rag(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_association_rag.txt", "w") as f:
+        render(create_association_prompt_rag(test_var1, test_var2, test_report), file=f)
+
+    print("\n\n3. TEMPORALITY PROMPT (RAG):")
+    print("-" * 80)
+    render(create_temporality_prompt_rag(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_temporality_rag.txt", "w") as f:
+        render(create_temporality_prompt_rag(test_var1, test_var2, test_report), file=f)
+
+    print("\n\n4. CAUSAL LITERATURE PROMPT (RAG):")
+    print("-" * 80)
+    render(create_causal_prompt_rag(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_causal_rag.txt", "w") as f:
+        render(create_causal_prompt_rag(test_var1, test_var2, test_report), file=f)
 
     print("\n" + "=" * 80)
     print("TESTING LLM PROMPTS WITHOUT REPORT (LLM context)")
@@ -136,19 +186,27 @@ differential stress exposure and coping mechanisms may contribute to these diffe
 
     print("\n1. PLAUSIBILITY PROMPT (LLM):")
     print("-" * 80)
-    print(create_plausibility_prompt_llm(test_var1, test_var2, test_report))
+    render(create_plausibility_prompt_llm(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_plausibility_llm.txt", "w") as f:
+        render(create_plausibility_prompt_llm(test_var1, test_var2, test_report), file=f)
 
     print("\n\n2. ASSOCIATION PROMPT (LLM):")
     print("-" * 80)
-    print(create_association_prompt_llm(test_var1, test_var2, test_report))
+    render(create_association_prompt_llm(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_association_llm.txt", "w") as f:
+        render(create_association_prompt_llm(test_var1, test_var2, test_report), file=f)
 
     print("\n\n3. TEMPORALITY PROMPT (LLM):")
     print("-" * 80)
-    print(create_temporality_prompt_llm(test_var1, test_var2, test_report))
+    render(create_temporality_prompt_llm(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_temporality_llm.txt", "w") as f:
+        render(create_temporality_prompt_llm(test_var1, test_var2, test_report), file=f)
 
     print("\n\n4. CAUSAL LITERATURE PROMPT (LLM):")
     print("-" * 80)
-    print(create_causal_prompt_llm(test_var1, test_var2, test_report))
+    render(create_causal_prompt_llm(test_var1, test_var2, test_report))
+    with open("raw_prompts/direction_causal_llm.txt", "w") as f:
+        render(create_causal_prompt_llm(test_var1, test_var2, test_report), file=f)
 
 
 def preview_construction_prompts():
@@ -172,11 +230,11 @@ def preview_construction_prompts():
     )
 
     with open("raw_prompts/entity_resolution_prompt.txt", "w") as f:
-        print(entity_resolution_prompt(example_entities), file=f)
+        render(entity_resolution_prompt(example_entities), file=f)
     with open("raw_prompts/graph_extraction_prompt.txt", "w") as f:
-        print(graph_extraction_prompt(example_chunk), file=f)
+        render(graph_extraction_prompt(example_chunk), file=f)
     with open("raw_prompts/summarize_community_prompt.txt", "w") as f:
-        print(summarize_community(example_community), file=f)
+        render(summarize_community(example_community), file=f)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1 @@
+Is there a causal relationship where a change in Sex precedes and leads to a change in Anxiety, either directly or through one or more intermediate variables? That is, does Sex temporally precede and influence Anxiety in a way consistent with a directional causal link? Output TRUE if there is a causal relationship and FALSE if not.

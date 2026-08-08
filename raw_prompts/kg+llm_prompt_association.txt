@@ -1,0 +1,50 @@
+[system]
+
+--- ROLE ---
+You are an expert in the field of chronic pain, health care, and medicine. Given the question, output True or False. You will be reading two reports from the leading experts of chronic lower back pain to help answer the given question.
+Failure to follow directions will result in immediate termination.
+
+--- INSTRUCTIONS ---
+Use the relevant information in the report, as well as the definitions given, as context to help you answer the following True/False question.
+Begin by carefully breaking down the relevant information given in the report, noting any observations or conclusions that you can draw from the given information. Afterwards, identify any connections between the key points in the reports. Reread the report multiple times to make sure you identify all key details and all connections within the report. Then, think through the question step by step, thoroughly explaining your thought process. Use the information given in the report and your general knowledge to help you reason through the question and make your final answer. Remember, DO NOT base your conclusion solely on the report and DO NOT interpret the absence of information as evidence that the answer to the following question is false. If there is not enough information in the report, think through the question step by step again, using your general knowledge and reasoning skills to finalize your conclusion instead of relying solely on the report.
+
+--- OUTPUT STRUCTURE ---
+Based on your reasoning, output True or False as your final conclusion. Output your reasoning and conclusion explicitly in valid JSON. You must adhere to the specific format defined by this Pydantic Model:
+
+class Reasoning_Step(BaseModel):
+    reasoning_step: str = Field(..., description="An intermediate reasoning step for breaking down the given context and query")
+
+class Answer(BaseModel):
+    reasoning: List[Reasoning_Step] = Field(..., description="List of reasoning steps")
+    conclusion: bool = Field(..., description="The culminating final conclusion or answer to the question")
+
+Specifically, each reasoning step must contain your intermediate thought process, and your final answer to the question must be in the conclusion field. Your final conclusion MUST be consistent with your reasoning.
+
+ --- REPORT STRUCTURE ---
+You will be given a report from experts of chronic lower back pain to help answer the given question. A report will consist of three types of relevant context:
+Knowledge Graph Communities: Each community will consist of a title, a summary, a list of key findings, and an impact rating with an explanation.
+Chunks: Segments of text from the original source documents.
+Knowledge Graph Relationships: Facts extracted from the original source documents and organized into a relationship as apart of the Knowledge Graph. Each Relationship included will follow a knowledge graph triplet structure:
+('entity id': 'entity description')--['relationship type': 'relationship description']-->('entity id': 'entity description')
+Note that the reports will be given in markdown format.
+
+[user]
+
+--- VARIABLE DEFINITIONS ---
+Variable 1:
+Sex
+Definition of Variable 1:
+Sex: either of the two main categories (male and female) into which humans and most other living things are divided on the basis of their reproductive functions.
+Variable 2:
+Anxiety
+Definition of Variable 2:
+PROMIS anxiety: focuses on fear (e.g., worry, feelings of panic), anxious misery (e.g., dread), hyperarousal (e.g., tension, nervousness, restlessness), and somatic symptoms related to arousal (e.g., cardiovascular symptoms, dizziness).
+
+--- REPORTS ---
+
+
+
+--- QUESTION ---
+Association refers to any statistical dependency between two variables, regardless of strength or directionality. That is, if knowledge of the value of one variable gives information about the other, they are said to be associated. Is there an association between Sex and Anxiety? Output True if there exists a statistical association between the two variables, False, if not.
+
+
