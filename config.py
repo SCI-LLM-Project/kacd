@@ -41,8 +41,7 @@ topEntities = 20
 # "meta-llama/Llama-3.3-70B-Instruct-Turbo", or a fine-tuned model's dedicated
 # endpoint name). API key is not stored here - see .env / LLM_API_KEY.
 LLM_BACKEND = "together"
-#LLM_MODEL = "atpspin-11c4/mistral-7b-instruct"
-LLM_MODEL = "atpspin-11c4/llama3.1_8B"
+LLM_MODEL = "together_endpoint_name"
 LLM_MAX_WORKERS = 24
 # Max tokens the model is allowed to generate per response (output only - has
 # no bearing on prompt/input size). Applied system-wide via get_client(); every
